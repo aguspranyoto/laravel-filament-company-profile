@@ -189,13 +189,16 @@
             to { opacity: 1; transform: translateY(0); }
         }
         .animate-fade-in { animation: fadeInUp 0.6s ease forwards; }
+
+        .mobile-menu { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; position: absolute; top: 100%; left: 0; right: 0; z-index: 50; }
+        .mobile-menu.open { max-height: 400px; }
     </style>
 </head>
 <body class="bg-white text-[#334155] antialiased">
     <a href="#main-content" class="skip-link">Skip to main content</a>
 
     {{-- Header --}}
-    <header class="bg-[#0f172a] text-white sticky top-0 z-50" role="banner">
+    <header class="bg-[#0f172a] text-white sticky top-0 z-50 relative" role="banner">
         <div class="container flex justify-between items-center py-4">
             <a href="/" class="text-2xl font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f59e0b]">
                 <span class="text-[#f59e0b]">Zero</span>xe
@@ -218,6 +221,31 @@
             <div class="hidden lg:block text-sm">
                 <span class="text-gray-400">Call anytime</span>
                 <a href="tel:+12312345678" class="font-semibold ml-2 hover:text-[#f59e0b] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f59e0b]">(+123) 1234 5678</a>
+            </div>
+            <button id="mobile-menu-btn" class="md:hidden text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f59e0b]" aria-label="Toggle navigation menu" aria-expanded="false">
+                <svg id="menu-icon-open" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                <svg id="menu-icon-close" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div id="mobile-menu" class="mobile-menu md:hidden border-t border-white/10 bg-[#0f172a] shadow-xl">
+            <nav class="container flex flex-col gap-1 py-4 text-sm font-medium" role="navigation" aria-label="Mobile navigation">
+                <a href="#" class="py-2 px-2 rounded hover:bg-white/10 hover:text-[#f59e0b] transition-colors">HOME</a>
+                <a href="#about" class="py-2 px-2 rounded hover:bg-white/10 hover:text-[#f59e0b] transition-colors">ABOUT</a>
+                <a href="#services" class="py-2 px-2 rounded hover:bg-white/10 hover:text-[#f59e0b] transition-colors">SERVICES</a>
+                <a href="#projects" class="py-2 px-2 rounded hover:bg-white/10 hover:text-[#f59e0b] transition-colors">PROJECTS</a>
+                <a href="#blog" class="py-2 px-2 rounded hover:bg-white/10 hover:text-[#f59e0b] transition-colors">NEWS</a>
+                <a href="#contact" class="py-2 px-2 rounded hover:bg-white/10 hover:text-[#f59e0b] transition-colors">CONTACT</a>
+                @if (Route::has('login'))
+                    @auth
+                        <a href="{{ url('/admin') }}" class="py-2 px-2 rounded hover:bg-white/10 hover:text-[#f59e0b] transition-colors">ADMIN</a>
+                    @else
+                        <a href="{{ route('login') }}" class="py-2 px-2 rounded hover:bg-white/10 hover:text-[#f59e0b] transition-colors">LOGIN</a>
+                    @endauth
+                @endif
+            </nav>
+            <div class="container pb-4 text-sm border-t border-white/10 pt-3">
+                <span class="text-gray-400">Call anytime</span>
+                <a href="tel:+12312345678" class="font-semibold ml-2 hover:text-[#f59e0b] transition-colors">(+123) 1234 5678</a>
             </div>
         </div>
     </header>
@@ -812,5 +840,25 @@
             </div>
         </div>
     </footer>
+    <script>
+        const btn = document.getElementById('mobile-menu-btn');
+        const menu = document.getElementById('mobile-menu');
+        const iconOpen = document.getElementById('menu-icon-open');
+        const iconClose = document.getElementById('menu-icon-close');
+        btn.addEventListener('click', () => {
+            const isOpen = menu.classList.toggle('open');
+            btn.setAttribute('aria-expanded', isOpen);
+            iconOpen.classList.toggle('hidden', isOpen);
+            iconClose.classList.toggle('hidden', !isOpen);
+        });
+        menu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                menu.classList.remove('open');
+                btn.setAttribute('aria-expanded', 'false');
+                iconOpen.classList.remove('hidden');
+                iconClose.classList.add('hidden');
+            });
+        });
+    </script>
 </body>
 </html>
