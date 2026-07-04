@@ -8,185 +8,539 @@
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     @endif
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
     <style>
-        .font-serif { font-family: Georgia, 'Times New Roman', serif; }
+        :root {
+            --font-heading: 'Playfair Display', Georgia, serif;
+            --font-body: 'Inter', system-ui, sans-serif;
+            --black: #09090b;
+            --white: #fafafa;
+            --gray: #71717a;
+            --border: #e4e4e7;
+            --accent: #2d5a27;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--white);
+            color: var(--black);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 clamp(20px, 4vw, 48px);
+        }
+
+        /* Header */
+        header {
+            padding: 28px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+        .logo {
+            font-family: var(--font-heading);
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--black);
+            text-decoration: none;
+            letter-spacing: -0.01em;
+        }
+        nav { display: flex; gap: 28px; }
+        nav a {
+            font-size: 13px;
+            font-weight: 400;
+            color: var(--gray);
+            text-decoration: none;
+            letter-spacing: 0.02em;
+            transition: color 0.2s;
+        }
+        nav a:hover { color: var(--black); }
+
+        /* Hero - Asymmetric */
+        .hero {
+            padding: clamp(60px, 10vw, 140px) 0 clamp(60px, 8vw, 100px);
+        }
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: clamp(40px, 6vw, 80px);
+            align-items: end;
+        }
+        .hero-left {}
+        .hero-tag {
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--accent);
+            margin-bottom: 24px;
+        }
+        .hero h1 {
+            font-family: var(--font-heading);
+            font-size: clamp(42px, 5.5vw, 72px);
+            font-weight: 400;
+            line-height: 1.08;
+            letter-spacing: -0.025em;
+            max-width: 600px;
+        }
+        .hero h1 em {
+            font-style: italic;
+            color: var(--accent);
+        }
+        .hero-right {
+            padding-bottom: 12px;
+        }
+        .hero-desc {
+            font-size: 16px;
+            line-height: 1.7;
+            color: var(--gray);
+            max-width: 400px;
+        }
+        .hero-desc strong {
+            color: var(--black);
+            font-weight: 500;
+        }
+
+        /* Divider */
+        .divider {
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* About - Two Column */
+        .about {
+            padding: clamp(60px, 8vw, 100px) 0;
+        }
+        .about-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: clamp(40px, 6vw, 80px);
+        }
+        .section-number {
+            font-family: var(--font-heading);
+            font-size: 14px;
+            font-weight: 400;
+            color: var(--gray);
+            margin-bottom: 8px;
+        }
+        .section-title {
+            font-family: var(--font-heading);
+            font-size: clamp(28px, 3vw, 36px);
+            font-weight: 400;
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+        }
+        .about-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .about-content p {
+            font-size: 15px;
+            line-height: 1.75;
+            color: var(--gray);
+        }
+        .about-content p:first-child {
+            font-size: 17px;
+            color: var(--black);
+            line-height: 1.65;
+        }
+
+        /* Stats - Inline */
+        .stats {
+            padding: clamp(40px, 5vw, 60px) 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 32px;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-value {
+            font-family: var(--font-heading);
+            font-size: clamp(36px, 4vw, 52px);
+            font-weight: 400;
+            line-height: 1;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+        .stat-label {
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--gray);
+        }
+
+        /* Services - Asymmetric Grid */
+        .services {
+            padding: clamp(60px, 8vw, 100px) 0;
+        }
+        .services-header {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: clamp(40px, 6vw, 80px);
+            margin-bottom: clamp(48px, 6vw, 80px);
+        }
+        .services-desc {
+            font-size: 15px;
+            line-height: 1.75;
+            color: var(--gray);
+            max-width: 480px;
+        }
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+        }
+        .service-card {
+            background: var(--white);
+            padding: clamp(32px, 4vw, 48px);
+            position: relative;
+        }
+        .service-num {
+            font-family: var(--font-heading);
+            font-size: 11px;
+            font-weight: 400;
+            color: var(--gray);
+            margin-bottom: 20px;
+        }
+        .service-card h3 {
+            font-family: var(--font-heading);
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 12px;
+            letter-spacing: -0.01em;
+        }
+        .service-card p {
+            font-size: 13px;
+            line-height: 1.7;
+            color: var(--gray);
+        }
+
+        /* Clients */
+        .clients {
+            padding: clamp(60px, 8vw, 100px) 0;
+            border-top: 1px solid var(--border);
+        }
+        .clients-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: clamp(40px, 6vw, 80px);
+            align-items: start;
+        }
+        .client-logos {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+            align-items: center;
+        }
+        .client-logo {
+            height: 28px;
+            background: var(--border);
+            border-radius: 2px;
+        }
+
+        /* Contact */
+        .contact {
+            padding: clamp(60px, 8vw, 100px) 0;
+            border-top: 1px solid var(--border);
+            background: #f4f4f5;
+        }
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: clamp(40px, 6vw, 80px);
+        }
+        .contact-left {}
+        .contact-right {
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+        .contact-item {}
+        .contact-label {
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--gray);
+            margin-bottom: 6px;
+        }
+        .contact-value {
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        .contact-value a {
+            color: var(--black);
+            text-decoration: none;
+            border-bottom: 1px solid var(--border);
+            transition: border-color 0.2s;
+        }
+        .contact-value a:hover {
+            border-color: var(--black);
+        }
+        .contact-social {
+            display: flex;
+            gap: 20px;
+            margin-top: 6px;
+        }
+        .contact-social a {
+            font-size: 14px;
+            color: var(--gray);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .contact-social a:hover { color: var(--black); }
+
+        /* Footer */
+        footer {
+            padding: 32px 0;
+            border-top: 1px solid var(--border);
+        }
+        footer .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        footer p {
+            font-size: 12px;
+            color: var(--gray);
+        }
+        footer-links {
+            display: flex;
+            gap: 20px;
+        }
+        footer-links a {
+            font-size: 12px;
+            color: var(--gray);
+            text-decoration: none;
+        }
+        footer-links a:hover { color: var(--black); }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-grid,
+            .about-grid,
+            .services-header,
+            .clients-grid,
+            .contact-grid {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+            .client-logos {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            nav { gap: 20px; }
+            footer .container {
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+            }
+        }
     </style>
 </head>
-<body class="bg-[#fafaf8] text-[#1a1a1a] antialiased font-sans">
-    {{-- Header --}}
-    <header class="border-b border-[#e5e5e3] py-8">
-        <div class="max-w-6xl mx-auto px-6 flex justify-between items-center">
-            <a href="/" class="font-serif text-3xl tracking-tight text-[#1a1a1a] no-underline">Studio</a>
-            <nav class="flex gap-8 items-center text-sm">
-                <a href="#about" class="text-[#6b6b6b] no-underline hover:text-[#1a1a1a] transition-colors">About</a>
-                <a href="#services" class="text-[#6b6b6b] no-underline hover:text-[#1a1a1a] transition-colors">Services</a>
-                <a href="#clients" class="text-[#6b6b6b] no-underline hover:text-[#1a1a1a] transition-colors">Clients</a>
-                <a href="#contact" class="text-[#6b6b6b] no-underline hover:text-[#1a1a1a] transition-colors">Contact</a>
+<body>
+    <header>
+        <div class="container">
+            <a href="/" class="logo">Studio.</a>
+            <nav>
+                <a href="#about">About</a>
+                <a href="#services">Services</a>
+                <a href="#clients">Clients</a>
+                <a href="#contact">Contact</a>
                 @if (Route::has('login'))
                     @auth
-                        <a href="{{ url('/admin') }}" class="text-[#6b6b6b] no-underline hover:text-[#1a1a1a] transition-colors">Admin</a>
+                        <a href="{{ url('/admin') }}">Admin</a>
                     @else
-                        <a href="{{ route('login') }}" class="text-[#6b6b6b] no-underline hover:text-[#1a1a1a] transition-colors">Login</a>
+                        <a href="{{ route('login') }}">Login</a>
                     @endauth
                 @endif
             </nav>
         </div>
     </header>
 
-    {{-- Hero --}}
-    <section class="pt-32 pb-20">
-        <div class="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-            <div>
-                <div class="text-xs uppercase tracking-widest text-[#2d5a27] mb-6">Digital Studio</div>
-                <h1 class="font-serif text-5xl lg:text-6xl leading-tight tracking-tight mb-6">We build digital products that matter</h1>
-                <p class="text-lg text-[#6b6b6b] max-w-md leading-relaxed">A small team of designers and developers crafting thoughtful software for companies who care about quality.</p>
-            </div>
-            <div class="bg-[#1a1a1a] aspect-[4/3] rounded-sm relative overflow-hidden">
-                <div class="absolute inset-5 border border-white/10"></div>
-            </div>
-        </div>
-    </section>
-
-    {{-- About --}}
-    <section id="about" class="py-24 border-t border-[#e5e5e3]">
-        <div class="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-3 gap-16">
-            <div>
-                <div class="text-xs uppercase tracking-widest text-[#6b6b6b]">About</div>
-                <h2 class="font-serif text-3xl leading-snug mt-4">Small team, big impact</h2>
-            </div>
-            <div class="lg:col-span-2 flex flex-col gap-6">
-                <p class="text-xl text-[#1a1a1a] leading-relaxed">We're a studio of 8 people who believe great software starts with understanding the problem, not jumping to solutions.</p>
-                <p class="text-base text-[#6b6b6b] leading-relaxed">Founded in 2020, we've worked with startups and enterprises alike — always with the same approach: listen first, design with intention, build with care.</p>
-                <p class="text-base text-[#6b6b6b] leading-relaxed">We don't chase trends. We build things that last.</p>
+    <section class="hero">
+        <div class="container">
+            <div class="hero-grid">
+                <div class="hero-left">
+                    <div class="hero-tag">Digital Studio — Est. 2020</div>
+                    <h1>We craft digital experiences that <em>endure</em></h1>
+                </div>
+                <div class="hero-right">
+                    <p class="hero-desc">A design-led studio building software for companies who believe quality is a competitive advantage. <strong>Eight people. Zero bloat.</strong></p>
+                </div>
             </div>
         </div>
     </section>
 
-    {{-- Stats --}}
-    <section class="py-16 bg-[#1a1a1a] text-white">
-        <div class="max-w-6xl mx-auto px-6 grid grid-cols-2 lg:grid-cols-4 gap-10">
-            <div class="text-center">
-                <div class="font-serif text-5xl leading-none mb-2">47</div>
-                <div class="text-xs text-white/50 uppercase tracking-wider">Projects Delivered</div>
-            </div>
-            <div class="text-center">
-                <div class="font-serif text-5xl leading-none mb-2">12</div>
-                <div class="text-xs text-white/50 uppercase tracking-wider">Countries Served</div>
-            </div>
-            <div class="text-center">
-                <div class="font-serif text-5xl leading-none mb-2">98%</div>
-                <div class="text-xs text-white/50 uppercase tracking-wider">Client Retention</div>
-            </div>
-            <div class="text-center">
-                <div class="font-serif text-5xl leading-none mb-2">5yr</div>
-                <div class="text-xs text-white/50 uppercase tracking-wider">Average Partnership</div>
-            </div>
-        </div>
-    </section>
+    <div class="divider"></div>
 
-    {{-- Services --}}
-    <section id="services" class="py-24 border-t border-[#e5e5e3]">
-        <div class="max-w-6xl mx-auto px-6">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 mb-16">
+    <section class="about" id="about">
+        <div class="container">
+            <div class="about-grid">
                 <div>
-                    <div class="text-xs uppercase tracking-widest text-[#6b6b6b]">Services</div>
-                    <h2 class="font-serif text-3xl leading-snug mt-4">What we do</h2>
+                    <div class="section-number">01</div>
+                    <h2 class="section-title">About the studio</h2>
                 </div>
-                <p class="text-base text-[#6b6b6b] leading-relaxed self-end">We focus on a few things and do them well. No bloated scope, no unnecessary complexity.</p>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-[#e5e5e3] border border-[#e5e5e3]">
-                <div class="bg-[#fafaf8] p-12">
-                    <div class="font-serif text-5xl text-[#e5e5e3] mb-6 leading-none">01</div>
-                    <h3 class="text-lg font-medium mb-3">Product Design</h3>
-                    <p class="text-sm text-[#6b6b6b] leading-relaxed">Research, wireframing, and high-fidelity design that puts users first. We think in systems, not screens.</p>
-                </div>
-                <div class="bg-[#fafaf8] p-12">
-                    <div class="font-serif text-5xl text-[#e5e5e3] mb-6 leading-none">02</div>
-                    <h3 class="text-lg font-medium mb-3">Web Development</h3>
-                    <p class="text-sm text-[#6b6b6b] leading-relaxed">Fast, accessible, and maintainable web applications. Built with modern tools, designed to scale.</p>
-                </div>
-                <div class="bg-[#fafaf8] p-12">
-                    <div class="font-serif text-5xl text-[#e5e5e3] mb-6 leading-none">03</div>
-                    <h3 class="text-lg font-medium mb-3">Mobile Apps</h3>
-                    <p class="text-sm text-[#6b6b6b] leading-relaxed">Native and cross-platform mobile experiences. Clean interfaces, smooth interactions, real performance.</p>
-                </div>
-                <div class="bg-[#fafaf8] p-12">
-                    <div class="font-serif text-5xl text-[#e5e5e3] mb-6 leading-none">04</div>
-                    <h3 class="text-lg font-medium mb-3">Brand Identity</h3>
-                    <p class="text-sm text-[#6b6b6b] leading-relaxed">Visual identity systems that communicate clearly. Logos, typography, color — the whole language.</p>
-                </div>
-                <div class="bg-[#fafaf8] p-12">
-                    <div class="font-serif text-5xl text-[#e5e5e3] mb-6 leading-none">05</div>
-                    <h3 class="text-lg font-medium mb-3">Strategy</h3>
-                    <p class="text-sm text-[#6b6b6b] leading-relaxed">Digital strategy and consulting. We help you figure out what to build before you build it.</p>
-                </div>
-                <div class="bg-[#fafaf8] p-12">
-                    <div class="font-serif text-5xl text-[#e5e5e3] mb-6 leading-none">06</div>
-                    <h3 class="text-lg font-medium mb-3">Maintenance</h3>
-                    <p class="text-sm text-[#6b6b6b] leading-relaxed">Ongoing support and iteration. Software isn't done at launch — we stick around.</p>
+                <div class="about-content">
+                    <p>We start with the problem, not the solution. Every project begins with understanding — who uses this, why does it matter, what does success look like.</p>
+                    <p>Founded in Jakarta in 2020, we've grown from two founders to a team of eight. We work with startups finding product-market fit and enterprises modernizing their digital presence. Same rigor, different scale.</p>
+                    <p>We don't do assembly-line work. Every project gets our full attention, and we stay involved after launch. Software is a living thing — it needs care.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    {{-- Clients --}}
-    <section id="clients" class="py-20 border-t border-[#e5e5e3]">
-        <div class="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-3 gap-16 items-start">
-            <div>
-                <div class="text-xs uppercase tracking-widest text-[#6b6b6b]">Clients</div>
-                <h2 class="font-serif text-3xl leading-snug mt-4">Trusted by</h2>
-            </div>
-            <div class="lg:col-span-2 grid grid-cols-3 gap-8 items-center">
-                <div class="h-8 bg-[#e5e5e3] rounded-sm opacity-60"></div>
-                <div class="h-8 bg-[#e5e5e3] rounded-sm opacity-60"></div>
-                <div class="h-8 bg-[#e5e5e3] rounded-sm opacity-60"></div>
-                <div class="h-8 bg-[#e5e5e3] rounded-sm opacity-60"></div>
-                <div class="h-8 bg-[#e5e5e3] rounded-sm opacity-60"></div>
-                <div class="h-8 bg-[#e5e5e3] rounded-sm opacity-60"></div>
+    <section class="stats">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value">47</div>
+                    <div class="stat-label">Projects</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">12</div>
+                    <div class="stat-label">Countries</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">98%</div>
+                    <div class="stat-label">Retention</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">5yr</div>
+                    <div class="stat-label">Avg. Partnership</div>
+                </div>
             </div>
         </div>
     </section>
 
-    {{-- Contact --}}
-    <section id="contact" class="py-24 border-t border-[#e5e5e3] bg-[#f0f5ee]">
-        <div class="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16">
-            <div>
-                <div class="text-xs uppercase tracking-widest text-[#6b6b6b]">Contact</div>
-                <h2 class="font-serif text-3xl leading-snug mt-4 mb-4">Let's work together</h2>
-                <p class="text-base text-[#6b6b6b] leading-relaxed">Have a project in mind? We'd love to hear about it.</p>
+    <section class="services" id="services">
+        <div class="container">
+            <div class="services-header">
+                <div>
+                    <div class="section-number">02</div>
+                    <h2 class="section-title">What we do</h2>
+                </div>
+                <p class="services-desc">Six capabilities, no distractions. We'd rather be excellent at a few things than mediocre at everything.</p>
             </div>
-            <div class="flex flex-col gap-6">
-                <div class="flex flex-col gap-1">
-                    <label class="text-xs uppercase tracking-widest text-[#6b6b6b]">Email</label>
-                    <a href="mailto:hello@studio.com" class="text-base text-[#1a1a1a] no-underline border-b border-[#e5e5e3] transition-colors hover:border-[#1a1a1a] w-fit pb-0.5">hello@studio.com</a>
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-num">— 01</div>
+                    <h3>Product Design</h3>
+                    <p>Research, wireframes, and high-fidelity interfaces. We design systems, not just screens.</p>
                 </div>
-                <div class="flex flex-col gap-1">
-                    <label class="text-xs uppercase tracking-widest text-[#6b6b6b]">Phone</label>
-                    <span class="text-base">+62 21 1234 5678</span>
+                <div class="service-card">
+                    <div class="service-num">— 02</div>
+                    <h3>Web Development</h3>
+                    <p>Fast, accessible applications. Modern stack, clean code, built to scale.</p>
                 </div>
-                <div class="flex flex-col gap-1">
-                    <label class="text-xs uppercase tracking-widest text-[#6b6b6b]">Address</label>
-                    <span class="text-base leading-relaxed">Jl. Sudirman No. 123<br>Jakarta, Indonesia</span>
+                <div class="service-card">
+                    <div class="service-num">— 03</div>
+                    <h3>Mobile Apps</h3>
+                    <p>Native and cross-platform. Smooth interactions, real performance, no compromises.</p>
                 </div>
-                <div class="flex flex-col gap-1">
-                    <label class="text-xs uppercase tracking-widest text-[#6b6b6b]">Social</label>
-                    <div class="flex gap-4 mt-1">
-                        <a href="#" class="text-base text-[#1a1a1a] no-underline border-b border-[#e5e5e3] transition-colors hover:border-[#1a1a1a] pb-0.5">Instagram</a>
-                        <a href="#" class="text-base text-[#1a1a1a] no-underline border-b border-[#e5e5e3] transition-colors hover:border-[#1a1a1a] pb-0.5">LinkedIn</a>
-                        <a href="#" class="text-base text-[#1a1a1a] no-underline border-b border-[#e5e5e3] transition-colors hover:border-[#1a1a1a] pb-0.5">Dribbble</a>
+                <div class="service-card">
+                    <div class="service-num">— 04</div>
+                    <h3>Brand Identity</h3>
+                    <p>Visual systems that communicate clearly. Logo, typography, color — the full language.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-num">— 05</div>
+                    <h3>Strategy</h3>
+                    <p>Digital consulting. We help you figure out what to build before you build it.</p>
+                </div>
+                <div class="service-card">
+                    <div class="service-num">— 06</div>
+                    <h3>Maintenance</h3>
+                    <p>Ongoing support and iteration. We don't disappear after launch.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="clients" id="clients">
+        <div class="container">
+            <div class="clients-grid">
+                <div>
+                    <div class="section-number">03</div>
+                    <h2 class="section-title">Selected clients</h2>
+                </div>
+                <div class="client-logos">
+                    <div class="client-logo"></div>
+                    <div class="client-logo"></div>
+                    <div class="client-logo"></div>
+                    <div class="client-logo"></div>
+                    <div class="client-logo"></div>
+                    <div class="client-logo"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="contact" id="contact">
+        <div class="container">
+            <div class="contact-grid">
+                <div class="contact-left">
+                    <div class="section-number">04</div>
+                    <h2 class="section-title">Get in touch</h2>
+                    <p style="margin-top: 16px; font-size: 15px; color: var(--gray); line-height: 1.75;">Have a project in mind? We'd like to hear about it.</p>
+                </div>
+                <div class="contact-right">
+                    <div class="contact-item">
+                        <div class="contact-label">Email</div>
+                        <div class="contact-value"><a href="mailto:hello@studio.id">hello@studio.id</a></div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-label">Phone</div>
+                        <div class="contact-value">+62 21 5785 4000</div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-label">Location</div>
+                        <div class="contact-value">Jl. Sudirman Kav. 52-53<br>Jakarta 12190, Indonesia</div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-label">Socials</div>
+                        <div class="contact-social">
+                            <a href="#">Instagram</a>
+                            <a href="#">LinkedIn</a>
+                            <a href="#">Dribbble</a>
+                            <a href="#">GitHub</a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    {{-- Footer --}}
-    <footer class="py-10 border-t border-[#e5e5e3]">
-        <div class="max-w-6xl mx-auto px-6 flex justify-between items-center max-md:flex-col max-md:gap-4 max-md:text-center">
-            <p class="text-sm text-[#6b6b6b]">&copy; {{ date('Y') }} Studio. All rights reserved.</p>
-            <div class="flex gap-6">
-                <a href="#" class="text-sm text-[#6b6b6b] no-underline hover:text-[#1a1a1a]">Privacy</a>
-                <a href="#" class="text-sm text-[#6b6b6b] no-underline hover:text-[#1a1a1a]">Terms</a>
+    <footer>
+        <div class="container">
+            <p>&copy; {{ date('Y') }} Studio. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#">Privacy</a>
+                <a href="#">Terms</a>
             </div>
         </div>
     </footer>
