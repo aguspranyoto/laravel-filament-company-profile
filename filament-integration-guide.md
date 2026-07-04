@@ -34,6 +34,15 @@ Goal: Every piece of content on the welcome page becomes editable from Filament 
 
 ## Step 1: Install Required Packages
 
+> **Filament v5 compatibility note:** This guide is written for Filament v5. Key v5 changes:
+> - `form()` method uses `Filament\Schemas\Schema` instead of `Filament\Forms\Form`
+> - Form components (TextInput, Textarea, Toggle, Select, etc.) are under `Filament\Forms\Components`
+> - Layout components (Section, Grid, Group) are under `Filament\Schemas\Components`
+> - Navigation config uses method overrides (`getNavigationIcon()`, etc.) instead of static properties
+> - `SpatieMediaLibraryPlugin` auto-discovers — no manual registration needed
+> - Navigation groups cannot have icons if their child items also have icons
+> - Use `->defaultSort('column', 'desc')` instead of `->defaultSortDesc()`
+
 ### 1a. Spatie Media Library
 
 ```bash
@@ -789,8 +798,9 @@ namespace App\Filament\Admin\Resources;
 
 use App\Filament\Admin\Resources\CompanySettingResource\Pages;
 use App\Models\CompanySetting;
-use Filament\Forms;
-use Filament\Forms\Form;
+use Filament\Forms\Components as FormComponents;
+use Filament\Schemas\Components;
+use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -799,33 +809,48 @@ class CompanySettingResource extends Resource
 {
     protected static ?string $model = CompanySetting::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
-    protected static ?string $navigationLabel = 'Company Settings';
-    protected static ?string $navigationGroup = 'Website Content';
-    protected static ?int $navigationSort = 1;
-
-    public static function form(Form $form): Form
+    public static function getNavigationIcon(): string
     {
-        return $form
+        return 'heroicon-o-cog-6-tooth';
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Company Settings';
+    }
+
+    public static function getNavigationSort(): int
+    {
+        return 1;
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Website Content';
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return $schema
             ->schema([
-                Forms\Components\Section::make('Company Information')
+                Components\Section::make('Company Information')
                     ->schema([
-                        Forms\Components\TextInput::make('company_name')
+                        FormComponents\TextInput::make('company_name')
                             ->required()
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('phone')
+                        FormComponents\TextInput::make('phone')
                             ->tel()
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('email')
+                        FormComponents\TextInput::make('email')
                             ->email()
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('address')
+                        FormComponents\TextInput::make('address')
                             ->maxLength(255),
                     ])->columns(2),
 
-                Forms\Components\Section::make('Logo')
+                Components\Section::make('Logo')
                     ->schema([
-                        \Filament\SpatieLaravelMediaLibraryPlugin\Components\SpatieMediaLibraryFileUpload::make('logo')
+                        \Filament\Forms\Components\SpatieMediaLibraryFileUpload::make('logo')
                             ->label('Company Logo')
                             ->collection('logo')
                             ->disk('public')
@@ -836,25 +861,25 @@ class CompanySettingResource extends Resource
                             ->visibleOn('edit'),
                     ]),
 
-                Forms\Components\Section::make('Social Media')
+                Components\Section::make('Social Media')
                     ->schema([
-                        Forms\Components\TextInput::make('facebook_url')
+                        FormComponents\TextInput::make('facebook_url')
                             ->label('Facebook URL')
                             ->url()
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('linkedin_url')
+                        FormComponents\TextInput::make('linkedin_url')
                             ->label('LinkedIn URL')
                             ->url()
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('twitter_url')
+                        FormComponents\TextInput::make('twitter_url')
                             ->label('Twitter / X URL')
                             ->url()
                             ->maxLength(255),
                     ])->columns(3),
 
-                Forms\Components\Section::make('Footer')
+                Components\Section::make('Footer')
                     ->schema([
-                        Forms\Components\Textarea::make('footer_description')
+                        FormComponents\Textarea::make('footer_description')
                             ->rows(3)
                             ->maxLength(500),
                     ]),
@@ -863,8 +888,6 @@ class CompanySettingResource extends Resource
 
     public static function table(Table $table): Table
     {
-        // This is a singleton - redirect to edit on list visit.
-        // But Filament requires a table() method. Return empty or redirect.
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('company_name'),
@@ -901,10 +924,10 @@ class ListCompanySettings extends ListRecords
      */
     public function mount(): void
     {
+        parent::mount();
+
         $setting = CompanySetting::instance(); // creates if not exists
-        abort(403, '', [
-            'Location' => route('filament.admin.resources.company-settings.edit', ['record' => $setting]),
-        ]);
+        $this->redirect(route('filament.admin.resources.company-settings.edit', ['record' => $setting]));
     }
 }
 ```
@@ -938,8 +961,9 @@ namespace App\Filament\Admin\Resources;
 
 use App\Filament\Admin\Resources\PageSectionResource\Pages;
 use App\Models\PageSection;
-use Filament\Forms;
-use Filament\Forms\Form;
+use Filament\Forms\Components as FormComponents;
+use Filament\Schemas\Components;
+use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -948,57 +972,64 @@ class PageSectionResource extends Resource
 {
     protected static ?string $model = PageSection::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
-    protected static ?string $navigationLabel = 'Page Sections';
-    protected static ?string $navigationGroup = 'Website Content';
-    protected static ?int $navigationSort = 2;
-
-    public static function form(Form $form): Form
+    public static function getNavigationIcon(): string
     {
-        return $form
+        return 'heroicon-o-document-text';
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Page Sections';
+    }
+
+    public static function getNavigationSort(): int
+    {
+        return 2;
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Website Content';
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return $schema
             ->schema([
-                Forms\Components\Section::make('Section Info')
+                Components\Section::make('Section Info')
                     ->schema([
-                        Forms\Components\TextInput::make('slug')
+                        FormComponents\TextInput::make('slug')
                             ->required()
                             ->unique(ignoreRecord: true)
                             ->helperText('Unique identifier: hero, about, benefits, who-we-are, contact')
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('subtitle')
+                        FormComponents\TextInput::make('subtitle')
                             ->helperText('Small label above title, e.g. "ABOUT US", "KEY BENEFITS"')
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('title')
+                        FormComponents\TextInput::make('title')
                             ->helperText('Main heading for this section')
                             ->maxLength(255),
-                        Forms\Components\Toggle::make('is_active')
+                        FormComponents\Toggle::make('is_active')
                             ->default(true),
                     ])->columns(2),
 
-                Forms\Components\Section::make('Content')
+                Components\Section::make('Content')
                     ->schema([
-                        Forms\Components\RichEditor::make('content')
+                        FormComponents\RichEditor::make('content')
                             ->label('Section Content')
                             ->columnSpanFull()
-                            ->helperText('Rich text content for this section. Use for about paragraphs, benefit descriptions, etc.'),
+                            ->helperText('Rich text content for this section.'),
                     ]),
 
-                Forms\Components\Section::make('Extra Data (JSON)')
+                Components\Section::make('Extra Data (JSON)')
                     ->schema([
-                        Forms\Components\KeyValue::make('extra')
+                        FormComponents\KeyValue::make('extra')
                             ->label('Additional Data')
-                            ->helperText('Key-value pairs for section-specific data. Examples below:')
+                            ->helperText('Key-value pairs for section-specific data.')
                             ->reorderable(),
                     ])
                     ->collapsible()
-                    ->collapsed()
-                    ->note('
-                        <strong>Extra data examples per section:</strong><br>
-                        <code>hero</code>: badge_number="15+", badge_text="Years Experience", button_primary_text="Get Consulting", button_primary_url="#contact", button_secondary_text="Open Account", image_url="..."<br>
-                        <code>about</code>: founder_name="Hendrik Morella", founder_role="CEO, DIRECTOR", founder_quote="...", founder_image_url="..."<br>
-                        <code>benefits</code>: benefit_items=["Benefit 1", "Benefit 2", ...]<br>
-                        <code>who-we-are</code>: vision_text="...", mission_text="..."<br>
-                        <code>contact</code>: address_text="...", phone_text="...", email_text="..."<br>
-                    '),
+                    ->collapsed(),
             ]);
     }
 
@@ -1031,7 +1062,7 @@ class PageSectionResource extends Resource
 }
 ```
 
-> **About the extra JSON column:** Using `Forms\Components\KeyValue` lets admins add key-value pairs without touching code. For more complex structured data (like benefit_items which is an array), consider using `Forms\Components\Repeater` with a custom approach, or store JSON strings in the KeyValue and decode them in the blade.
+> **About the extra JSON column:** Using `FormComponents\KeyValue` lets admins add key-value pairs without touching code. For more complex structured data (like benefit_items which is an array), consider using `FormComponents\Repeater` with a custom approach, or store JSON strings in the KeyValue and decode them in the blade.
 
 ### 4c. Service Resource
 
@@ -1046,8 +1077,9 @@ namespace App\Filament\Admin\Resources;
 
 use App\Filament\Admin\Resources\ServiceResource\Pages;
 use App\Models\Service;
-use Filament\Forms;
-use Filament\Forms\Form;
+use Filament\Forms\Components as FormComponents;
+use Filament\Schemas\Components;
+use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -1056,29 +1088,40 @@ class ServiceResource extends Resource
 {
     protected static ?string $model = Service::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-wrench';
-    protected static ?string $navigationGroup = 'Website Content';
-    protected static ?int $navigationSort = 3;
-
-    public static function form(Form $form): Form
+    public static function getNavigationIcon(): string
     {
-        return $form
+        return 'heroicon-o-wrench';
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Website Content';
+    }
+
+    public static function getNavigationSort(): int
+    {
+        return 3;
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return $schema
             ->schema([
-                Forms\Components\Section::make()
+                Components\Section::make()
                     ->schema([
-                        Forms\Components\TextInput::make('title')
+                        FormComponents\TextInput::make('title')
                             ->required()
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('icon')
+                        FormComponents\TextInput::make('icon')
                             ->helperText('Emoji or icon class, e.g. 📊')
                             ->maxLength(10),
-                        Forms\Components\Textarea::make('description')
+                        FormComponents\Textarea::make('description')
                             ->rows(3)
                             ->maxLength(500),
-                        Forms\Components\TextInput::make('sort_order')
+                        FormComponents\TextInput::make('sort_order')
                             ->numeric()
                             ->default(0),
-                        Forms\Components\Toggle::make('is_active')
+                        FormComponents\Toggle::make('is_active')
                             ->default(true),
                     ])->columns(2),
             ]);
@@ -1120,41 +1163,53 @@ namespace App\Filament\Admin\Resources;
 
 use App\Filament\Admin\Resources\ProjectResource\Pages;
 use App\Models\Project;
-use Filament\Forms;
-use Filament\Forms\Form;
+use Filament\Forms\Components as FormComponents;
+use Filament\Schemas\Components;
+use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\SpatieLaravelMediaLibraryPlugin\Components\SpatieMediaLibraryFileUpload;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 
 class ProjectResource extends Resource
 {
     protected static ?string $model = Project::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-briefcase';
-    protected static ?string $navigationGroup = 'Website Content';
-    protected static ?int $navigationSort = 4;
-
-    public static function form(Form $form): Form
+    public static function getNavigationIcon(): string
     {
-        return $form
+        return 'heroicon-o-briefcase';
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Website Content';
+    }
+
+    public static function getNavigationSort(): int
+    {
+        return 4;
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return $schema
             ->schema([
-                Forms\Components\Section::make()
+                Components\Section::make()
                     ->schema([
-                        Forms\Components\TextInput::make('title')
+                        FormComponents\TextInput::make('title')
                             ->required()
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('category')
+                        FormComponents\TextInput::make('category')
                             ->helperText('e.g. Business, Finance, Digital')
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('sort_order')
+                        FormComponents\TextInput::make('sort_order')
                             ->numeric()
                             ->default(0),
-                        Forms\Components\Toggle::make('is_active')
+                        FormComponents\Toggle::make('is_active')
                             ->default(true),
                     ])->columns(2),
 
-                Forms\Components\Section::make('Project Image')
+                Components\Section::make('Project Image')
                     ->schema([
                         SpatieMediaLibraryFileUpload::make('project-image')
                             ->label('Project Image')
@@ -1205,8 +1260,9 @@ namespace App\Filament\Admin\Resources;
 
 use App\Filament\Admin\Resources\PricingPlanResource\Pages;
 use App\Models\PricingPlan;
-use Filament\Forms;
-use Filament\Forms\Form;
+use Filament\Forms\Components as FormComponents;
+use Filament\Schemas\Components;
+use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -1215,43 +1271,54 @@ class PricingPlanResource extends Resource
 {
     protected static ?string $model = PricingPlan::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
-    protected static ?string $navigationGroup = 'Website Content';
-    protected static ?int $navigationSort = 5;
-
-    public static function form(Form $form): Form
+    public static function getNavigationIcon(): string
     {
-        return $form
+        return 'heroicon-o-currency-dollar';
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Website Content';
+    }
+
+    public static function getNavigationSort(): int
+    {
+        return 5;
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return $schema
             ->schema([
-                Forms\Components\Section::make()
+                Components\Section::make()
                     ->schema([
-                        Forms\Components\TextInput::make('name')
+                        FormComponents\TextInput::make('name')
                             ->required()
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('price')
+                        FormComponents\TextInput::make('price')
                             ->required()
                             ->numeric()
                             ->prefix('$'),
-                        Forms\Components\TextInput::make('period')
+                        FormComponents\TextInput::make('period')
                             ->default('Monthly')
                             ->maxLength(50),
-                        Forms\Components\Toggle::make('is_popular')
+                        FormComponents\Toggle::make('is_popular')
                             ->default(false),
-                        Forms\Components\TextInput::make('badge')
+                        FormComponents\TextInput::make('badge')
                             ->helperText('e.g. POPULAR')
                             ->maxLength(50),
-                        Forms\Components\TextInput::make('sort_order')
+                        FormComponents\TextInput::make('sort_order')
                             ->numeric()
                             ->default(0),
-                        Forms\Components\Toggle::make('is_active')
+                        FormComponents\Toggle::make('is_active')
                             ->default(true),
                     ])->columns(3),
 
-                Forms\Components\Section::make('Features')
+                Components\Section::make('Features')
                     ->schema([
-                        Forms\Components\Repeater::make('features')
+                        FormComponents\Repeater::make('features')
                             ->schema([
-                                Forms\Components\TextInput::make('feature')
+                                FormComponents\TextInput::make('feature')
                                     ->required()
                                     ->maxLength(255),
                             ])
@@ -1304,36 +1371,48 @@ namespace App\Filament\Admin\Resources;
 
 use App\Filament\Admin\Resources\TestimonialResource\Pages;
 use App\Models\Testimonial;
-use Filament\Forms;
-use Filament\Forms\Form;
+use Filament\Forms\Components as FormComponents;
+use Filament\Schemas\Components;
+use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\SpatieLaravelMediaLibraryPlugin\Components\SpatieMediaLibraryFileUpload;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 
 class TestimonialResource extends Resource
 {
     protected static ?string $model = Testimonial::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-left-ellipsis';
-    protected static ?string $navigationGroup = 'Website Content';
-    protected static ?int $navigationSort = 6;
-
-    public static function form(Form $form): Form
+    public static function getNavigationIcon(): string
     {
-        return $form
+        return 'heroicon-o-chat-bubble-left-ellipsis';
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Website Content';
+    }
+
+    public static function getNavigationSort(): int
+    {
+        return 6;
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return $schema
             ->schema([
-                Forms\Components\Section::make()
+                Components\Section::make()
                     ->schema([
-                        Forms\Components\TextInput::make('name')
+                        FormComponents\TextInput::make('name')
                             ->required()
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('role')
+                        FormComponents\TextInput::make('role')
                             ->helperText('e.g. CEO, Tech Corp')
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('company')
+                        FormComponents\TextInput::make('company')
                             ->maxLength(255),
-                        Forms\Components\Select::make('rating')
+                        FormComponents\Select::make('rating')
                             ->options([
                                 5 => '★★★★★',
                                 4 => '★★★★☆',
@@ -1343,17 +1422,17 @@ class TestimonialResource extends Resource
                             ])
                             ->default(5)
                             ->required(),
-                        Forms\Components\Textarea::make('quote')
+                        FormComponents\Textarea::make('quote')
                             ->required()
                             ->rows(3),
-                        Forms\Components\TextInput::make('sort_order')
+                        FormComponents\TextInput::make('sort_order')
                             ->numeric()
                             ->default(0),
-                        Forms\Components\Toggle::make('is_active')
+                        FormComponents\Toggle::make('is_active')
                             ->default(true),
                     ])->columns(2),
 
-                Forms\Components\Section::make('Avatar')
+                Components\Section::make('Avatar')
                     ->schema([
                         SpatieMediaLibraryFileUpload::make('avatar')
                             ->label('Client Avatar')
@@ -1412,57 +1491,74 @@ namespace App\Filament\Admin\Resources;
 use App\Filament\Admin\Resources\PostResource\Pages;
 use App\Models\Post;
 use Filament\Forms;
-use Filament\Forms\Form;
+use Filament\Forms\Components as FormComponents;
+use Filament\Schemas\Components;
+use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\SpatieLaravelMediaLibraryPlugin\Components\SpatieMediaLibraryFileUpload;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 
 class PostResource extends Resource
 {
     protected static ?string $model = Post::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-newspaper';
-    protected static ?string $navigationLabel = 'Blog / News';
-    protected static ?string $navigationGroup = 'Website Content';
-    protected static ?int $navigationSort = 7;
-
-    public static function form(Form $form): Form
+    public static function getNavigationIcon(): string
     {
-        return $form
+        return 'heroicon-o-newspaper';
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Blog / News';
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Website Content';
+    }
+
+    public static function getNavigationSort(): int
+    {
+        return 7;
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return $schema
             ->schema([
-                Forms\Components\Section::make('Post Info')
+                Components\Section::make('Post Info')
                     ->schema([
-                        Forms\Components\TextInput::make('title')
+                        FormComponents\TextInput::make('title')
                             ->required()
                             ->maxLength(255)
                             ->reactive()
                             ->afterStateUpdated(fn (Forms\Set $set, ?string $state) =>
                                 $set('slug', \Illuminate\Support\Str::slug($state ?? ''))
                             ),
-                        Forms\Components\TextInput::make('slug')
+                        FormComponents\TextInput::make('slug')
                             ->required()
                             ->unique(ignoreRecord: true)
                             ->maxLength(255),
-                        Forms\Components\DatePicker::make('published_at')
+                        FormComponents\DatePicker::make('published_at')
                             ->label('Publish Date'),
-                        Forms\Components\Toggle::make('is_published')
+                        FormComponents\Toggle::make('is_published')
                             ->default(false),
                     ])->columns(2),
 
-                Forms\Components\Section::make('Content')
+                Components\Section::make('Content')
                     ->schema([
-                        Forms\Components\Textarea::make('excerpt')
+                        FormComponents\Textarea::make('excerpt')
                             ->rows(2)
                             ->helperText('Short summary shown on blog listing')
                             ->columnSpanFull(),
-                        Forms\Components\RichEditor::make('content')
+                        FormComponents\RichEditor::make('content')
                             ->label('Full Content')
                             ->columnSpanFull()
                             ->helperText('Full article content with rich text formatting'),
                     ]),
 
-                Forms\Components\Section::make('Featured Image')
+                Components\Section::make('Featured Image')
                     ->schema([
                         SpatieMediaLibraryFileUpload::make('featured-image')
                             ->label('Featured Image')
@@ -1487,7 +1583,7 @@ class PostResource extends Resource
                     ->sortable(),
                 Tables\Columns\IconColumn::make('is_published')->boolean(),
             ])
-            ->defaultSortDesc('published_at');
+            ->defaultSort('published_at', 'desc');
     }
 
     public static function getPages(): array
@@ -1514,43 +1610,59 @@ namespace App\Filament\Admin\Resources;
 
 use App\Filament\Admin\Resources\ClientLogoResource\Pages;
 use App\Models\ClientLogo;
-use Filament\Forms;
-use Filament\Forms\Form;
+use Filament\Forms\Components as FormComponents;
+use Filament\Schemas\Components;
+use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\SpatieLaravelMediaLibraryPlugin\Components\SpatieMediaLibraryFileUpload;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 
 class ClientLogoResource extends Resource
 {
     protected static ?string $model = ClientLogo::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-user-group';
-    protected static ?string $navigationLabel = 'Client Logos';
-    protected static ?string $navigationGroup = 'Website Content';
-    protected static ?int $navigationSort = 8;
-
-    public static function form(Form $form): Form
+    public static function getNavigationIcon(): string
     {
-        return $form
+        return 'heroicon-o-user-group';
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Client Logos';
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Website Content';
+    }
+
+    public static function getNavigationSort(): int
+    {
+        return 8;
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return $schema
             ->schema([
-                Forms\Components\Section::make()
+                Components\Section::make()
                     ->schema([
-                        Forms\Components\TextInput::make('name')
+                        FormComponents\TextInput::make('name')
                             ->required()
                             ->maxLength(255),
-                        Forms\Components\TextInput::make('url')
+                        FormComponents\TextInput::make('url')
                             ->url()
                             ->maxLength(255)
                             ->helperText('Optional link when logo is clicked'),
-                        Forms\Components\TextInput::make('sort_order')
+                        FormComponents\TextInput::make('sort_order')
                             ->numeric()
                             ->default(0),
-                        Forms\Components\Toggle::make('is_active')
+                        FormComponents\Toggle::make('is_active')
                             ->default(true),
                     ])->columns(2),
 
-                Forms\Components\Section::make('Logo Image')
+                Components\Section::make('Logo Image')
                     ->schema([
                         SpatieMediaLibraryFileUpload::make('logo')
                             ->label('Client Logo')
@@ -1600,8 +1712,9 @@ namespace App\Filament\Admin\Resources;
 
 use App\Filament\Admin\Resources\CounterStatResource\Pages;
 use App\Models\CounterStat;
-use Filament\Forms;
-use Filament\Forms\Form;
+use Filament\Forms\Components as FormComponents;
+use Filament\Schemas\Components;
+use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -1610,27 +1723,42 @@ class CounterStatResource extends Resource
 {
     protected static ?string $model = CounterStat::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
-    protected static ?string $navigationLabel = 'Counter Stats';
-    protected static ?string $navigationGroup = 'Website Content';
-    protected static ?int $navigationSort = 9;
-
-    public static function form(Form $form): Form
+    public static function getNavigationIcon(): string
     {
-        return $form
+        return 'heroicon-o-chart-bar';
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Counter Stats';
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Website Content';
+    }
+
+    public static function getNavigationSort(): int
+    {
+        return 9;
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return $schema
             ->schema([
-                Forms\Components\TextInput::make('number_value')
+                FormComponents\TextInput::make('number_value')
                     ->required()
                     ->helperText('e.g. 15+, 200+, 98%')
                     ->maxLength(20),
-                Forms\Components\TextInput::make('label')
+                FormComponents\TextInput::make('label')
                     ->required()
                     ->helperText('e.g. Years Experience, Project Completed')
                     ->maxLength(255),
-                Forms\Components\TextInput::make('sort_order')
+                FormComponents\TextInput::make('sort_order')
                     ->numeric()
                     ->default(0),
-                Forms\Components\Toggle::make('is_active')
+                FormComponents\Toggle::make('is_active')
                     ->default(true),
             ])->columns(2);
     }
@@ -1662,26 +1790,23 @@ class CounterStatResource extends Resource
 
 ---
 
-## Step 5: Register Navigation Group & Spatie Media Plugin
+## Step 5: Register Navigation Groups
 
-Add navigation group labels and register the Spatie Media Library plugin in your `AdminPanelProvider.php`:
+Add navigation group labels in your `AdminPanelProvider.php`:
+
+> **Note:** In Filament v5, `SpatieMediaLibraryPlugin` auto-discovers — no manual registration needed. Also, navigation groups cannot have icons if their child items also have icons.
 
 ```php
 // app/Providers/Filament/AdminPanelProvider.php
 
 use Filament\Navigation\NavigationGroup;
-use Filament\SpatieLaravelMediaLibraryPlugin\SpatieMediaLibraryPlugin;
 
 // Inside the panel() method, add:
 ->navigationGroups([
     NavigationGroup::make()
         ->label('Dashboard'),
     NavigationGroup::make()
-        ->label('Website Content')
-        ->icon('heroicon-o-globe-alt'),
-])
-->plugins([
-    SpatieMediaLibraryPlugin::make(),
+        ->label('Website Content'),
 ])
 ```
 
@@ -2541,7 +2666,7 @@ RichEditor::configureUsing(function (RichEditor $editor) {
 Or configure per-field in the resource:
 
 ```php
-Forms\Components\RichEditor::make('content')
+FormComponents\RichEditor::make('content')
     ->toolbarButtons([
         'bold', 'italic', 'h2', 'h3',
         'bulletList', 'orderedList',
@@ -2603,16 +2728,8 @@ resources/views/
 **Spatie Media not found:**
 Make sure you ran `sail artisan vendor:publish --provider="Spatie\MediaLibrary\MediaLibraryServiceProvider" --tag="medialibrary-migrations"` and then `sail artisan migrate`.
 
-**Spatie Media Library plugin not working:**
-Ensure you registered the plugin in `AdminPanelProvider.php`:
-```php
-use Filament\SpatieLaravelMediaLibraryPlugin\SpatieMediaLibraryPlugin;
-
-->plugins([
-    SpatieMediaLibraryPlugin::make(),
-])
-```
-Also make sure to use `SpatieMediaLibraryFileUpload` component in your resources, not regular `FileUpload`.
+**Spatie Media Library component not working:**
+Make sure to use `SpatieMediaLibraryFileUpload` component in your resources, not regular `FileUpload`. In Filament v5, the plugin auto-discovers — no manual registration needed.
 
 **RichEditor not rendering:**
 Ensure the Filament assets are published:
