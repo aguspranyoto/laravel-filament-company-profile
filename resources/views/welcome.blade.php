@@ -201,7 +201,7 @@
     <header class="bg-[#0f172a] text-white sticky top-0 z-50 relative" role="banner">
         <div class="container flex justify-between items-center py-4">
             <a href="/" class="text-2xl font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f59e0b]">
-                <span class="text-[#f59e0b]">Zero</span>xe
+                <span class="text-[#f59e0b]">{{ Str::before($settings->company_name, ' ') }}</span>{{ Str::after($settings->company_name, ' ') }}
             </a>
             <nav class="hidden md:flex gap-8 text-sm font-medium" role="navigation" aria-label="Main navigation">
                 <a href="#" class="nav-link hover:text-[#f59e0b] transition-colors">HOME</a>
@@ -220,7 +220,7 @@
             </nav>
             <div class="hidden lg:block text-sm">
                 <span class="text-gray-400">Call anytime</span>
-                <a href="tel:+12312345678" class="font-semibold ml-2 hover:text-[#f59e0b] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f59e0b]">(+123) 1234 5678</a>
+                <a href="tel:{{ $settings->phone }}" class="font-semibold ml-2 hover:text-[#f59e0b] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f59e0b]">{{ $settings->phone }}</a>
             </div>
             <button id="mobile-menu-btn" class="md:hidden text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f59e0b]" aria-label="Toggle navigation menu" aria-expanded="false">
                 <svg id="menu-icon-open" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -245,170 +245,189 @@
             </nav>
             <div class="container pb-4 text-sm border-t border-white/10 pt-3">
                 <span class="text-gray-400">Call anytime</span>
-                <a href="tel:+12312345678" class="font-semibold ml-2 hover:text-[#f59e0b] transition-colors">(+123) 1234 5678</a>
+                <a href="tel:{{ $settings->phone }}" class="font-semibold ml-2 hover:text-[#f59e0b] transition-colors">{{ $settings->phone }}</a>
             </div>
         </div>
     </header>
 
     <main id="main-content">
         {{-- Hero --}}
+        @if($hero)
         <section class="bg-[#0f172a] text-white py-20 lg:py-32" aria-labelledby="hero-heading">
             <div class="container grid lg:grid-cols-2 gap-12 items-center">
                 <div>
-                    <div class="text-[#f59e0b] text-xs font-bold tracking-[0.2em] mb-4">OPTIMIZE YOUR BUSINESS GROWTH</div>
+                    <div class="text-[#f59e0b] text-xs font-bold tracking-[0.2em] mb-4">{{ $hero->subtitle ?? '' }}</div>
                     <h1 id="hero-heading" class="text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight mb-6">
-                        Professional service provided by experts with specialized knowledge
+                        {{ $hero->title ?? '' }}
                     </h1>
-                    <p class="text-gray-400 text-lg mb-8 max-w-lg">
-                        Cursus vitae congue mauris rhoncus aenean vel elit scelerisque. Mauris pellentesque pulvinar pellentesque habitant morbi tristique senectus et netus.
-                    </p>
+                    <div class="text-gray-400 text-lg mb-8 max-w-lg">
+                        {!! $hero->content ?? '' !!}
+                    </div>
                     <div class="flex flex-wrap gap-4">
-                        <a href="#contact" class="btn-primary">Get Consulting - It's Free</a>
-                        <a href="#" class="btn-outline">Open Account</a>
+                        @if($hero->getExtra('button_primary_text'))
+                            <a href="{{ $hero->getExtra('button_primary_url', '#contact') }}" class="btn-primary">{{ $hero->getExtra('button_primary_text') }}</a>
+                        @endif
+                        @if($hero->getExtra('button_secondary_text'))
+                            <a href="{{ $hero->getExtra('button_secondary_url', '#') }}" class="btn-outline">{{ $hero->getExtra('button_secondary_text') }}</a>
+                        @endif
                     </div>
                 </div>
                 <div class="relative">
-                    <img src="https://placehold.co/600x400/1e293b/f59e0b?text=Consulting+Expert" alt="Consulting expert providing professional advice" class="rounded-lg shadow-2xl" width="600" height="400" loading="eager">
-                    <div class="absolute -bottom-6 -left-6 bg-[#f59e0b] text-white p-6 rounded-lg" aria-hidden="true">
-                        <div class="text-3xl font-bold">15+</div>
-                        <div class="text-sm">Years Experience</div>
-                    </div>
+                    @if($hero->getExtra('image_url'))
+                        <img src="{{ $hero->getExtra('image_url') }}" alt="{{ $hero->title ?? 'Hero image' }}" class="rounded-lg shadow-2xl" width="600" height="400" loading="eager">
+                    @else
+                        <img src="https://placehold.co/600x400/1e293b/f59e0b?text=Consulting+Expert" alt="Consulting expert providing professional advice" class="rounded-lg shadow-2xl" width="600" height="400" loading="eager">
+                    @endif
+                    @if($hero->getExtra('badge_number') || $hero->getExtra('badge_text'))
+                        <div class="absolute -bottom-6 -left-6 bg-[#f59e0b] text-white p-6 rounded-lg" aria-hidden="true">
+                            <div class="text-3xl font-bold">{{ $hero->getExtra('badge_number', '') }}</div>
+                            <div class="text-sm">{{ $hero->getExtra('badge_text', '') }}</div>
+                        </div>
+                    @endif
                 </div>
             </div>
         </section>
+        @endif
 
         {{-- Trusted By --}}
+        @if($clientLogos->count())
         <section class="py-12 bg-white border-b" aria-label="Trusted by companies">
             <div class="container">
                 <div class="text-center mb-8">
                     <span class="text-sm font-semibold text-gray-500 tracking-wider">TRUSTED BY 1,200+ POPULAR COMPANY</span>
                 </div>
                 <div class="flex flex-wrap justify-center items-center gap-8 lg:gap-16 opacity-60" role="list">
-                    <img src="https://placehold.co/120x40/fff/333?text=Logo+1" alt="Client company logo" class="h-8" width="120" height="40" loading="lazy">
-                    <img src="https://placehold.co/120x40/fff/333?text=Logo+2" alt="Client company logo" class="h-8" width="120" height="40" loading="lazy">
-                    <img src="https://placehold.co/120x40/fff/333?text=Logo+3" alt="Client company logo" class="h-8" width="120" height="40" loading="lazy">
-                    <img src="https://placehold.co/120x40/fff/333?text=Logo+4" alt="Client company logo" class="h-8" width="120" height="40" loading="lazy">
-                    <img src="https://placehold.co/120x40/fff/333?text=Logo+5" alt="Client company logo" class="h-8" width="120" height="40" loading="lazy">
+                    @foreach($clientLogos as $logo)
+                        @if($logo->getFirstMediaUrl('logo'))
+                            @if($logo->url)
+                                <a href="{{ $logo->url }}" target="_blank" rel="noopener noreferrer" role="listitem">
+                                    <img src="{{ $logo->getFirstMediaUrl('logo') }}" alt="{{ $logo->name }}" class="h-8" width="120" height="40" loading="lazy">
+                                </a>
+                            @else
+                                <img src="{{ $logo->getFirstMediaUrl('logo') }}" alt="{{ $logo->name }}" class="h-8" width="120" height="40" loading="lazy" role="listitem">
+                            @endif
+                        @endif
+                    @endforeach
                 </div>
             </div>
         </section>
+        @endif
 
         {{-- Experience Counter --}}
+        @if($counterStats->count())
         <section class="py-16 bg-[#f8fafc]" aria-label="Company statistics">
             <div class="container grid grid-cols-2 lg:grid-cols-4 gap-8">
-                <div class="stat-card">
-                    <div class="stat-number">15+</div>
-                    <div class="stat-label">Years Experience</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">200+</div>
-                    <div class="stat-label">Project Completed</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">50+</div>
-                    <div class="stat-label">Team Members</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">98%</div>
-                    <div class="stat-label">Client Satisfaction</div>
-                </div>
+                @foreach($counterStats as $stat)
+                    <div class="stat-card">
+                        <div class="stat-number">{{ $stat->number_value }}</div>
+                        <div class="stat-label">{{ $stat->label }}</div>
+                    </div>
+                @endforeach
             </div>
         </section>
+        @endif
 
         {{-- About Us --}}
+        @if($about)
         <section id="about" class="py-20" aria-labelledby="about-heading">
             <div class="container grid lg:grid-cols-2 gap-16 items-center">
                 <div>
-                    <img src="https://placehold.co/600x500/0f172a/f59e0b?text=About+Us" alt="Our team collaborating in a modern office" class="rounded-lg shadow-xl" width="600" height="500" loading="lazy">
+                    @if($about->getExtra('image_url'))
+                        <img src="{{ $about->getExtra('image_url') }}" alt="{{ $about->title ?? 'About Us' }}" class="rounded-lg shadow-xl" width="600" height="500" loading="lazy">
+                    @else
+                        <img src="https://placehold.co/600x500/0f172a/f59e0b?text=About+Us" alt="Our team collaborating in a modern office" class="rounded-lg shadow-xl" width="600" height="500" loading="lazy">
+                    @endif
                 </div>
                 <div>
                     <div class="section-subtitle">ABOUT US</div>
-                    <h2 id="about-heading" class="section-title">The primary goal of business consulting is to help organizations.</h2>
-                    <p class="text-gray-500 mb-6 leading-relaxed">
-                        Viverra ipsum nunc aliquet bibendum enim facilisis gravida neque. Turpis egestas pretium aenean pharetra magna ac. Sem nulla pharetra diam sit amet nisl suscipit adipiscing bibendum.
-                    </p>
-                    <p class="text-gray-500 mb-8 leading-relaxed">
-                        Donec enim diam vulputate ut pharetra sit amet aliquam id. In ornare quam viverra orci sagittis eu. Non nisi est sit amet facilisis. Suscipit tellus mauris a diam maecenas.
-                    </p>
-                    <blockquote class="bg-[#f8fafc] p-6 rounded-lg border-l-4 border-[#f59e0b]">
-                        <p class="italic text-gray-600 mb-4">"Odio eu feugiat pretium nibh ipsum. Pellentesque habitant morbi tristique senectus et netus et."</p>
-                        <footer class="flex items-center gap-4">
-                            <img src="https://placehold.co/50x50/0f172a/fff?text=HM" alt="Hendrik Morella" class="rounded-full" width="50" height="50" loading="lazy">
-                            <div>
-                                <div class="font-semibold">Hendrik Morella</div>
-                                <div class="text-sm text-gray-500">CEO, DIRECTOR</div>
-                            </div>
-                        </footer>
-                    </blockquote>
+                    <h2 id="about-heading" class="section-title">{{ $about->title ?? '' }}</h2>
+                    <div class="text-gray-500 mb-8 leading-relaxed">
+                        {!! $about->content ?? '' !!}
+                    </div>
+                    @if($about->getExtra('founder_quote'))
+                        <blockquote class="bg-[#f8fafc] p-6 rounded-lg border-l-4 border-[#f59e0b]">
+                            <p class="italic text-gray-600 mb-4">"{{ $about->getExtra('founder_quote') }}"</p>
+                            <footer class="flex items-center gap-4">
+                                @if($about->getExtra('founder_image'))
+                                    <img src="{{ $about->getExtra('founder_image') }}" alt="{{ $about->getExtra('founder_name', '') }}" class="rounded-full" width="50" height="50" loading="lazy">
+                                @else
+                                    <img src="https://placehold.co/50x50/0f172a/fff?text={{ substr($about->getExtra('founder_name', 'HM'), 0, 2) }}" alt="{{ $about->getExtra('founder_name', '') }}" class="rounded-full" width="50" height="50" loading="lazy">
+                                @endif
+                                <div>
+                                    <div class="font-semibold">{{ $about->getExtra('founder_name', '') }}</div>
+                                    <div class="text-sm text-gray-500">{{ $about->getExtra('founder_role', '') }}</div>
+                                </div>
+                            </footer>
+                        </blockquote>
+                    @endif
                 </div>
             </div>
         </section>
+        @endif
 
         {{-- Key Benefits --}}
+        @if($benefits)
         <section class="py-20 bg-[#0f172a] text-white" aria-labelledby="benefits-heading">
             <div class="container grid lg:grid-cols-2 gap-16 items-center">
                 <div>
                     <div class="section-subtitle">KEY BENEFITS</div>
-                    <h2 id="benefits-heading" class="section-title text-white">Why should choose us?</h2>
-                    <p class="text-gray-400 mb-8">
-                        At ultrices mi tempus imperdiet nulla elit eget. Congue nisi vitae suscipit tellus mauris a diam maecenas sed. Nunc id cursus metus aliquam eleifend mi.
-                    </p>
-                    <ul class="space-y-4" role="list">
-                        <li class="flex items-start gap-3">
-                            <svg class="w-5 h-5 text-[#f59e0b] mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                            <span>Maecenas pharetra convallis posuere morbi leo urna</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <svg class="w-5 h-5 text-[#f59e0b] mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                            <span>Nisi lacus sed viverra tellus in hac habitasse platea</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <svg class="w-5 h-5 text-[#f59e0b] mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                            <span>Pretium lectus quam id leo in vitae turpis integer</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <svg class="w-5 h-5 text-[#f59e0b] mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                            <span>Lacus vel facilisis volutpat est curabitur gravida arcu</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <svg class="w-5 h-5 text-[#f59e0b] mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                            <span>Odio morbi quis commodo odio aenean sed adipiscing</span>
-                        </li>
-                    </ul>
+                    <h2 id="benefits-heading" class="section-title text-white">{{ $benefits->title ?? '' }}</h2>
+                    <div class="text-gray-400 mb-8">
+                        {!! $benefits->content ?? '' !!}
+                    </div>
+                    @php $benefitItems = $benefits->getExtra('benefit_items', []); @endphp
+                    @if(count($benefitItems))
+                        <ul class="space-y-4" role="list">
+                            @foreach($benefitItems as $item)
+                                <li class="flex items-start gap-3">
+                                    <svg class="w-5 h-5 text-[#f59e0b] mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                                    <span>{{ is_array($item) ? ($item['text'] ?? ($item['title'] ?? '')) : $item }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @endif
                 </div>
                 <div>
-                    <img src="https://placehold.co/600x500/1e293b/f59e0b?text=Benefits" alt="Key benefits of our consulting services" class="rounded-lg shadow-xl" width="600" height="500" loading="lazy">
+                    @if($benefits->getExtra('image_url'))
+                        <img src="{{ $benefits->getExtra('image_url') }}" alt="{{ $benefits->title ?? 'Benefits' }}" class="rounded-lg shadow-xl" width="600" height="500" loading="lazy">
+                    @else
+                        <img src="https://placehold.co/600x500/1e293b/f59e0b?text=Benefits" alt="Key benefits of our consulting services" class="rounded-lg shadow-xl" width="600" height="500" loading="lazy">
+                    @endif
                 </div>
             </div>
         </section>
+        @endif
 
         {{-- Who We Are --}}
+        @if($whoWeAre)
         <section class="py-20" aria-labelledby="vision-mission-heading">
             <div class="container">
                 <div class="text-center mb-16">
                     <div class="section-subtitle">WHO WE ARE</div>
-                    <h2 id="vision-mission-heading" class="section-title">Consultants typically have expertise in a particular industry.</h2>
+                    <h2 id="vision-mission-heading" class="section-title">{{ $whoWeAre->title ?? '' }}</h2>
                 </div>
                 <div class="grid md:grid-cols-2 gap-8">
                     <div class="bg-[#f8fafc] p-8 rounded-lg">
                         <div class="w-14 h-14 bg-[#f59e0b] rounded-lg flex items-center justify-center text-white text-2xl font-bold mb-6" aria-hidden="true">V</div>
                         <h3 class="text-xl font-bold mb-4">VISION</h3>
                         <p class="text-gray-500 leading-relaxed">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris tempus nisl vitae magna pulvinar laoreet. Nullam ac tortor vitae purus faucibus ornare suspendisse sed nisi.
+                            {{ $whoWeAre->getExtra('vision_text', '') }}
                         </p>
                     </div>
                     <div class="bg-[#f8fafc] p-8 rounded-lg">
                         <div class="w-14 h-14 bg-[#0f172a] rounded-lg flex items-center justify-center text-white text-2xl font-bold mb-6" aria-hidden="true">M</div>
                         <h3 class="text-xl font-bold mb-4">MISSION</h3>
                         <p class="text-gray-500 leading-relaxed">
-                            Massa tincidunt nunc pulvinar sapien et ligula ullamcorper malesuada. Felis bibendum ut tristique et egestas quis ipsum suspendisse nec ullamcorper.
+                            {{ $whoWeAre->getExtra('mission_text', '') }}
                         </p>
                     </div>
                 </div>
             </div>
         </section>
+        @endif
 
         {{-- Services --}}
+        @if($services->count())
         <section id="services" class="py-20 bg-[#f8fafc]" aria-labelledby="services-heading">
             <div class="container">
                 <div class="text-center mb-16">
@@ -419,65 +438,24 @@
                     </p>
                 </div>
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <article class="card p-8">
-                        <div class="service-icon bg-[#f59e0b]">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                        </div>
-                        <h3 class="text-lg font-bold mb-3">Business Strategy</h3>
-                        <p class="text-gray-500 text-sm leading-relaxed">
-                            Develop comprehensive strategies to achieve your business goals and maximize growth potential.
-                        </p>
-                    </article>
-                    <article class="card p-8">
-                        <div class="service-icon bg-[#0f172a]">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-                        </div>
-                        <h3 class="text-lg font-bold mb-3">Financial Consulting</h3>
-                        <p class="text-gray-500 text-sm leading-relaxed">
-                            Expert financial advice to optimize your operations and improve profitability.
-                        </p>
-                    </article>
-                    <article class="card p-8">
-                        <div class="service-icon bg-[#f59e0b]">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                        </div>
-                        <h3 class="text-lg font-bold mb-3">Market Research</h3>
-                        <p class="text-gray-500 text-sm leading-relaxed">
-                            In-depth market analysis to identify opportunities and stay ahead of competition.
-                        </p>
-                    </article>
-                    <article class="card p-8">
-                        <div class="service-icon bg-[#0f172a]">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                        </div>
-                        <h3 class="text-lg font-bold mb-3">Management Consulting</h3>
-                        <p class="text-gray-500 text-sm leading-relaxed">
-                            Streamline your operations and improve efficiency with our management expertise.
-                        </p>
-                    </article>
-                    <article class="card p-8">
-                        <div class="service-icon bg-[#f59e0b]">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                        </div>
-                        <h3 class="text-lg font-bold mb-3">Digital Transformation</h3>
-                        <p class="text-gray-500 text-sm leading-relaxed">
-                            Modernize your business with cutting-edge digital solutions and technologies.
-                        </p>
-                    </article>
-                    <article class="card p-8">
-                        <div class="service-icon bg-[#0f172a]">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                        </div>
-                        <h3 class="text-lg font-bold mb-3">Partnership</h3>
-                        <p class="text-gray-500 text-sm leading-relaxed">
-                            Build strategic partnerships to expand your reach and accelerate growth.
-                        </p>
-                    </article>
+                    @foreach($services as $service)
+                        <article class="card p-8">
+                            <div class="service-icon bg-[#f59e0b]">
+                                {!! $service->icon ?? '' !!}
+                            </div>
+                            <h3 class="text-lg font-bold mb-3">{{ $service->title ?? '' }}</h3>
+                            <p class="text-gray-500 text-sm leading-relaxed">
+                                {{ $service->description ?? '' }}
+                            </p>
+                        </article>
+                    @endforeach
                 </div>
             </div>
         </section>
+        @endif
 
         {{-- Projects --}}
+        @if($projects->count())
         <section id="projects" class="py-20" aria-labelledby="projects-heading">
             <div class="container">
                 <div class="text-center mb-16">
@@ -485,38 +463,28 @@
                     <h2 id="projects-heading" class="section-title">Thinking forward for your results.</h2>
                 </div>
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <article class="project-card">
-                        <img src="https://placehold.co/600x400/0f172a/f59e0b?text=Project+1" alt="Strategic Planning project showcase" width="600" height="400" loading="lazy">
-                        <div class="project-overlay">
-                            <div>
-                                <div class="text-[#f59e0b] text-sm font-semibold mb-1">Business</div>
-                                <div class="text-white font-bold">Strategic Planning</div>
+                    @foreach($projects as $project)
+                        <article class="project-card">
+                            @if($project->getFirstMediaUrl('project-image'))
+                                <img src="{{ $project->getFirstMediaUrl('project-image') }}" alt="{{ $project->title ?? 'Project' }}" width="600" height="400" loading="lazy">
+                            @else
+                                <img src="https://placehold.co/600x400/0f172a/f59e0b?text={{ urlencode($project->title ?? 'Project') }}" alt="{{ $project->title ?? 'Project' }}" width="600" height="400" loading="lazy">
+                            @endif
+                            <div class="project-overlay">
+                                <div>
+                                    <div class="text-[#f59e0b] text-sm font-semibold mb-1">{{ $project->category ?? '' }}</div>
+                                    <div class="text-white font-bold">{{ $project->title ?? '' }}</div>
+                                </div>
                             </div>
-                        </div>
-                    </article>
-                    <article class="project-card">
-                        <img src="https://placehold.co/600x400/1e293b/f59e0b?text=Project+2" alt="Market Analysis project showcase" width="600" height="400" loading="lazy">
-                        <div class="project-overlay">
-                            <div>
-                                <div class="text-[#f59e0b] text-sm font-semibold mb-1">Finance</div>
-                                <div class="text-white font-bold">Market Analysis</div>
-                            </div>
-                        </div>
-                    </article>
-                    <article class="project-card">
-                        <img src="https://placehold.co/600x400/334155/f59e0b?text=Project+3" alt="Digital Transformation project showcase" width="600" height="400" loading="lazy">
-                        <div class="project-overlay">
-                            <div>
-                                <div class="text-[#f59e0b] text-sm font-semibold mb-1">Digital</div>
-                                <div class="text-white font-bold">Digital Transformation</div>
-                            </div>
-                        </div>
-                    </article>
+                        </article>
+                    @endforeach
                 </div>
             </div>
         </section>
+        @endif
 
         {{-- Pricing --}}
+        @if($pricingPlans->count())
         <section class="py-20 bg-[#f8fafc]" aria-labelledby="pricing-heading">
             <div class="container">
                 <div class="text-center mb-16">
@@ -526,81 +494,35 @@
                         Nisl pretium fusce id velit ut tortor pretium viverra. Eleifend quam adipiscing vitae proin sagittis nisl rhoncus.
                     </p>
                 </div>
-                <div class="grid md:grid-cols-3 gap-8 items-start">
-                    <div class="pricing-card">
-                        <div class="text-lg font-bold mb-2">Basic</div>
-                        <div class="text-4xl font-bold text-[#0f172a] mb-1">$49</div>
-                        <div class="text-sm text-gray-500 mb-6">/Monthly</div>
-                        <ul class="text-left space-y-3 mb-8" role="list">
-                            <li class="flex items-center gap-2 text-sm text-gray-600">
-                                <svg class="w-4 h-4 text-[#f59e0b] flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                                5 Analytics Campaign
-                            </li>
-                            <li class="flex items-center gap-2 text-sm text-gray-600">
-                                <svg class="w-4 h-4 text-[#f59e0b] flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                                3 User Team Member
-                            </li>
-                            <li class="flex items-center gap-2 text-sm text-gray-600">
-                                <svg class="w-4 h-4 text-[#f59e0b] flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                                24/7 Support
-                            </li>
-                        </ul>
-                        <a href="#" class="btn-secondary w-full text-center">Choose Plan</a>
-                    </div>
-                    <div class="pricing-card featured">
-                        <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#f59e0b] text-white text-xs font-bold px-4 py-1 rounded-full">POPULAR</div>
-                        <div class="text-lg font-bold mb-2">Premium</div>
-                        <div class="text-4xl font-bold mb-1">$99</div>
-                        <div class="text-sm text-gray-400 mb-6">/Monthly</div>
-                        <ul class="text-left space-y-3 mb-8" role="list">
-                            <li class="flex items-center gap-2 text-sm text-gray-300">
-                                <svg class="w-4 h-4 text-[#f59e0b] flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                                15 Analytics Campaign
-                            </li>
-                            <li class="flex items-center gap-2 text-sm text-gray-300">
-                                <svg class="w-4 h-4 text-[#f59e0b] flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                                10 User Team Member
-                            </li>
-                            <li class="flex items-center gap-2 text-sm text-gray-300">
-                                <svg class="w-4 h-4 text-[#f59e0b] flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                                Priority Support
-                            </li>
-                            <li class="flex items-center gap-2 text-sm text-gray-300">
-                                <svg class="w-4 h-4 text-[#f59e0b] flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                                Custom Reports
-                            </li>
-                        </ul>
-                        <a href="#" class="btn-primary w-full text-center">Choose Plan</a>
-                    </div>
-                    <div class="pricing-card">
-                        <div class="text-lg font-bold mb-2">Enterprise</div>
-                        <div class="text-4xl font-bold text-[#0f172a] mb-1">$199</div>
-                        <div class="text-sm text-gray-500 mb-6">/Monthly</div>
-                        <ul class="text-left space-y-3 mb-8" role="list">
-                            <li class="flex items-center gap-2 text-sm text-gray-600">
-                                <svg class="w-4 h-4 text-[#f59e0b] flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                                Unlimited Campaigns
-                            </li>
-                            <li class="flex items-center gap-2 text-sm text-gray-600">
-                                <svg class="w-4 h-4 text-[#f59e0b] flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                                Unlimited Team Members
-                            </li>
-                            <li class="flex items-center gap-2 text-sm text-gray-600">
-                                <svg class="w-4 h-4 text-[#f59e0b] flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                                24/7 Priority Support
-                            </li>
-                            <li class="flex items-center gap-2 text-sm text-gray-600">
-                                <svg class="w-4 h-4 text-[#f59e0b] flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                                Dedicated Manager
-                            </li>
-                        </ul>
-                        <a href="#" class="btn-secondary w-full text-center">Choose Plan</a>
-                    </div>
+                <div class="grid md:grid-cols-{{ $pricingPlans->count() > 3 ? 4 : ($pricingPlans->count() > 2 ? 3 : $pricingPlans->count()) }} gap-8 items-start">
+                    @foreach($pricingPlans as $plan)
+                        <div class="pricing-card {{ $plan->is_popular ? 'featured' : '' }}">
+                            @if($plan->badge)
+                                <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#f59e0b] text-white text-xs font-bold px-4 py-1 rounded-full">{{ $plan->badge }}</div>
+                            @endif
+                            <div class="text-lg font-bold mb-2">{{ $plan->name ?? '' }}</div>
+                            <div class="text-4xl font-bold {{ $plan->is_popular ? '' : 'text-[#0f172a]' }} mb-1">${{ $plan->price ?? '0' }}</div>
+                            <div class="text-sm {{ $plan->is_popular ? 'text-gray-400' : 'text-gray-500' }} mb-6">/{{ $plan->period ?? 'Monthly' }}</div>
+                            @if(!empty($plan->features))
+                                <ul class="text-left space-y-3 mb-8" role="list">
+                                    @foreach($plan->features as $feature)
+                                        <li class="flex items-center gap-2 text-sm {{ $plan->is_popular ? 'text-gray-300' : 'text-gray-600' }}">
+                                            <svg class="w-4 h-4 text-[#f59e0b] flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                                            {{ is_array($feature) ? ($feature['feature'] ?? '') : $feature }}
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            @endif
+                            <a href="#" class="{{ $plan->is_popular ? 'btn-primary' : 'btn-secondary' }} w-full text-center">Choose Plan</a>
+                        </div>
+                    @endforeach
                 </div>
             </div>
         </section>
+        @endif
 
         {{-- Testimonials --}}
+        @if($testimonials->count())
         <section class="py-20 bg-[#0f172a] text-white" aria-labelledby="testimonials-heading">
             <div class="container">
                 <div class="text-center mb-16">
@@ -608,68 +530,38 @@
                     <h2 id="testimonials-heading" class="section-title text-white">What our clients say.</h2>
                 </div>
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <article class="testimonial-card">
-                        <div class="flex gap-1 text-[#f59e0b] mb-4" role="img" aria-label="5 out of 5 stars">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                        </div>
-                        <p class="text-gray-400 mb-6 italic">
-                            "Excellent consulting service. They helped us increase our revenue by 40% in just 6 months. Highly recommended!"
-                        </p>
-                        <footer class="flex items-center gap-4">
-                            <img src="https://placehold.co/50x50/f59e0b/0f172a?text=JD" alt="John Doe" class="rounded-full" width="50" height="50" loading="lazy">
-                            <div>
-                                <div class="font-semibold">John Doe</div>
-                                <div class="text-sm text-gray-500">CEO, Tech Corp</div>
-                            </div>
-                        </footer>
-                    </article>
-                    <article class="testimonial-card">
-                        <div class="flex gap-1 text-[#f59e0b] mb-4" role="img" aria-label="5 out of 5 stars">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                        </div>
-                        <p class="text-gray-400 mb-6 italic">
-                            "Professional team with deep industry knowledge. They transformed our business operations completely."
-                        </p>
-                        <footer class="flex items-center gap-4">
-                            <img src="https://placehold.co/50x50/f59e0b/0f172a?text=SM" alt="Sarah Miller" class="rounded-full" width="50" height="50" loading="lazy">
-                            <div>
-                                <div class="font-semibold">Sarah Miller</div>
-                                <div class="text-sm text-gray-500">Director, Finance Inc</div>
-                            </div>
-                        </footer>
-                    </article>
-                    <article class="testimonial-card">
-                        <div class="flex gap-1 text-[#f59e0b] mb-4" role="img" aria-label="5 out of 5 stars">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                        </div>
-                        <p class="text-gray-400 mb-6 italic">
-                            "Their strategic insights were invaluable. We've seen consistent growth since partnering with them."
-                        </p>
-                        <footer class="flex items-center gap-4">
-                            <img src="https://placehold.co/50x50/f59e0b/0f172a?text=RW" alt="Robert Wilson" class="rounded-full" width="50" height="50" loading="lazy">
-                            <div>
-                                <div class="font-semibold">Robert Wilson</div>
-                                <div class="text-sm text-gray-500">Founder, StartupXYZ</div>
-                            </div>
-                        </footer>
-                    </article>
+                    @foreach($testimonials as $testimonial)
+                        <article class="testimonial-card">
+                            @if($testimonial->rating)
+                                <div class="flex gap-1 text-[#f59e0b] mb-4" role="img" aria-label="{{ $testimonial->rating }} out of 5 stars">
+                                    @for($i = 1; $i <= 5; $i++)
+                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                    @endfor
+                                </div>
+                            @endif
+                            <p class="text-gray-400 mb-6 italic">
+                                "{{ $testimonial->quote ?? '' }}"
+                            </p>
+                            <footer class="flex items-center gap-4">
+                                @if($testimonial->getFirstMediaUrl('avatar'))
+                                    <img src="{{ $testimonial->getFirstMediaUrl('avatar') }}" alt="{{ $testimonial->name ?? '' }}" class="rounded-full" width="50" height="50" loading="lazy">
+                                @else
+                                    <img src="https://placehold.co/50x50/f59e0b/0f172a?text={{ substr($testimonial->name ?? 'U', 0, 2) }}" alt="{{ $testimonial->name ?? '' }}" class="rounded-full" width="50" height="50" loading="lazy">
+                                @endif
+                                <div>
+                                    <div class="font-semibold">{{ $testimonial->name ?? '' }}</div>
+                                    <div class="text-sm text-gray-500">{{ $testimonial->role ?? '' }}</div>
+                                </div>
+                            </footer>
+                        </article>
+                    @endforeach
                 </div>
             </div>
         </section>
+        @endif
 
         {{-- Blog --}}
+        @if($posts->count())
         <section id="blog" class="py-20" aria-labelledby="blog-heading">
             <div class="container">
                 <div class="text-center mb-16">
@@ -677,49 +569,39 @@
                     <h2 id="blog-heading" class="section-title">Latest insights & updates.</h2>
                 </div>
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <article class="blog-card">
-                        <img src="https://placehold.co/600x300/0f172a/f59e0b?text=Blog+1" alt="Business growth strategies article" class="w-full h-48 object-cover" width="600" height="300" loading="lazy">
-                        <div class="p-6">
-                            <time class="text-sm text-gray-500 mb-2 block" datetime="2025-01-15">Jan 15, 2025</time>
-                            <h3 class="font-bold mb-2 hover:text-[#f59e0b] transition-colors cursor-pointer">
-                                How to Grow Your Business in 2025
-                            </h3>
-                            <p class="text-sm text-gray-500">Discover the key strategies to scale your business this year...</p>
-                        </div>
-                    </article>
-                    <article class="blog-card">
-                        <img src="https://placehold.co/600x300/1e293b/f59e0b?text=Blog+2" alt="Digital transformation trends article" class="w-full h-48 object-cover" width="600" height="300" loading="lazy">
-                        <div class="p-6">
-                            <time class="text-sm text-gray-500 mb-2 block" datetime="2025-01-10">Jan 10, 2025</time>
-                            <h3 class="font-bold mb-2 hover:text-[#f59e0b] transition-colors cursor-pointer">
-                                Digital Transformation Trends
-                            </h3>
-                            <p class="text-sm text-gray-500">Stay ahead with the latest digital transformation trends...</p>
-                        </div>
-                    </article>
-                    <article class="blog-card">
-                        <img src="https://placehold.co/600x300/334155/f59e0b?text=Blog+3" alt="Financial planning tips article" class="w-full h-48 object-cover" width="600" height="300" loading="lazy">
-                        <div class="p-6">
-                            <time class="text-sm text-gray-500 mb-2 block" datetime="2025-01-05">Jan 5, 2025</time>
-                            <h3 class="font-bold mb-2 hover:text-[#f59e0b] transition-colors cursor-pointer">
-                                Financial Planning for Startups
-                            </h3>
-                            <p class="text-sm text-gray-500">Essential financial planning tips for new businesses...</p>
-                        </div>
-                    </article>
+                    @foreach($posts as $post)
+                        <article class="blog-card">
+                            @if($post->getFirstMediaUrl('featured-image'))
+                                <img src="{{ $post->getFirstMediaUrl('featured-image') }}" alt="{{ $post->title ?? 'Blog post' }}" class="w-full h-48 object-cover" width="600" height="300" loading="lazy">
+                            @else
+                                <img src="https://placehold.co/600x300/0f172a/f59e0b?text={{ urlencode($post->title ?? 'Blog') }}" alt="{{ $post->title ?? 'Blog post' }}" class="w-full h-48 object-cover" width="600" height="300" loading="lazy">
+                            @endif
+                            <div class="p-6">
+                                @if($post->published_at)
+                                    <time class="text-sm text-gray-500 mb-2 block" datetime="{{ $post->published_at->format('Y-m-d') }}">{{ $post->published_at->format('M d, Y') }}</time>
+                                @endif
+                                <h3 class="font-bold mb-2 hover:text-[#f59e0b] transition-colors cursor-pointer">
+                                    {{ $post->title ?? '' }}
+                                </h3>
+                                <p class="text-sm text-gray-500">{{ $post->excerpt ?? '' }}</p>
+                            </div>
+                        </article>
+                    @endforeach
                 </div>
             </div>
         </section>
+        @endif
 
         {{-- Contact --}}
+        @if($contact)
         <section id="contact" class="py-20 bg-[#f8fafc]" aria-labelledby="contact-heading">
             <div class="container grid lg:grid-cols-2 gap-16">
                 <div>
                     <div class="section-subtitle">CONTACT US</div>
                     <h2 id="contact-heading" class="section-title">Get in touch with us.</h2>
-                    <p class="text-gray-500 mb-8">
-                        Have a project in mind? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
-                    </p>
+                    <div class="text-gray-500 mb-8">
+                        {!! $contact->content ?? '' !!}
+                    </div>
                     <div class="space-y-6">
                         <div class="flex items-start gap-4">
                             <div class="contact-icon bg-[#f59e0b]">
@@ -727,7 +609,7 @@
                             </div>
                             <div>
                                 <div class="font-semibold mb-1">Our Office</div>
-                                <div class="text-gray-500 text-sm">Jl. Sudirman No. 123, Jakarta, Indonesia</div>
+                                <div class="text-gray-500 text-sm">{{ $settings->address ?? '' }}</div>
                             </div>
                         </div>
                         <div class="flex items-start gap-4">
@@ -736,7 +618,7 @@
                             </div>
                             <div>
                                 <div class="font-semibold mb-1">Call Us</div>
-                                <a href="tel:+12312345678" class="text-gray-500 text-sm hover:text-[#f59e0b] transition-colors">(+123) 1234 5678</a>
+                                <a href="tel:{{ $settings->phone ?? '' }}" class="text-gray-500 text-sm hover:text-[#f59e0b] transition-colors">{{ $settings->phone ?? '' }}</a>
                             </div>
                         </div>
                         <div class="flex items-start gap-4">
@@ -745,7 +627,7 @@
                             </div>
                             <div>
                                 <div class="font-semibold mb-1">Email Us</div>
-                                <a href="mailto:hello@zeroxe.com" class="text-gray-500 text-sm hover:text-[#f59e0b] transition-colors">hello@zeroxe.com</a>
+                                <a href="mailto:{{ $settings->email ?? '' }}" class="text-gray-500 text-sm hover:text-[#f59e0b] transition-colors">{{ $settings->email ?? '' }}</a>
                             </div>
                         </div>
                     </div>
@@ -775,6 +657,7 @@
                 </div>
             </div>
         </section>
+        @endif
     </main>
 
     {{-- Footer --}}
@@ -782,22 +665,28 @@
         <div class="container grid md:grid-cols-2 lg:grid-cols-4 gap-12">
             <div>
                 <a href="/" class="text-2xl font-bold mb-4 block focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#f59e0b]">
-                    <span class="text-[#f59e0b]">Zero</span>xe
+                    <span class="text-[#f59e0b]">{{ Str::before($settings->company_name, ' ') }}</span>{{ Str::after($settings->company_name, ' ') }}
                 </a>
                 <p class="text-gray-400 text-sm leading-relaxed mb-6">
-                    Professional consulting services to help your business grow and succeed in today's competitive market.
+                    {{ $settings->footer_description ?? '' }}
                 </p>
                 <div class="flex gap-4" role="list">
-                    <a href="#" class="social-link" aria-label="Facebook">f</a>
-                    <a href="#" class="social-link" aria-label="LinkedIn">in</a>
-                    <a href="#" class="social-link" aria-label="Twitter">tw</a>
+                    @if($settings->facebook_url)
+                        <a href="{{ $settings->facebook_url }}" class="social-link" aria-label="Facebook" target="_blank" rel="noopener noreferrer">f</a>
+                    @endif
+                    @if($settings->linkedin_url)
+                        <a href="{{ $settings->linkedin_url }}" class="social-link" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer">in</a>
+                    @endif
+                    @if($settings->twitter_url)
+                        <a href="{{ $settings->twitter_url }}" class="social-link" aria-label="Twitter" target="_blank" rel="noopener noreferrer">tw</a>
+                    @endif
                 </div>
             </div>
             <div>
                 <h4 class="font-bold mb-6">Quick Links</h4>
                 <nav aria-label="Footer quick links">
                     <ul class="space-y-3 text-sm text-gray-400">
-                        <li><a href="#" class="footer-link">About Us</a></li>
+                        <li><a href="#about" class="footer-link">About Us</a></li>
                         <li><a href="#services" class="footer-link">Services</a></li>
                         <li><a href="#projects" class="footer-link">Projects</a></li>
                         <li><a href="#blog" class="footer-link">News</a></li>
@@ -809,10 +698,9 @@
                 <h4 class="font-bold mb-6">Services</h4>
                 <nav aria-label="Footer services links">
                     <ul class="space-y-3 text-sm text-gray-400">
-                        <li><a href="#services" class="footer-link">Business Strategy</a></li>
-                        <li><a href="#services" class="footer-link">Financial Consulting</a></li>
-                        <li><a href="#services" class="footer-link">Market Research</a></li>
-                        <li><a href="#services" class="footer-link">Digital Transformation</a></li>
+                        @foreach($services->take(4) as $service)
+                            <li><a href="#services" class="footer-link">{{ $service->title ?? '' }}</a></li>
+                        @endforeach
                     </ul>
                 </nav>
             </div>
@@ -830,7 +718,7 @@
         </div>
         <div class="container mt-12 pt-8 border-t border-gray-800">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500">
-                <p>&copy; {{ date('Y') }} Zeroxe. All rights reserved.</p>
+                <p>&copy; {{ date('Y') }} {{ $settings->company_name ?? config('app.name') }}. All rights reserved.</p>
                 <nav aria-label="Legal links">
                     <div class="flex gap-6">
                         <a href="#" class="hover:text-white transition-colors">Privacy Policy</a>
