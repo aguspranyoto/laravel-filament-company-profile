@@ -830,8 +830,9 @@ class CompanySettingResource extends Resource
 
                 Forms\Components\Section::make('Logo')
                     ->schema([
-                        \Filament\Forms\Components\FileUpload::make('logo')
+                        \Filament\SpatieLaravelMediaLibraryPlugin\Components\SpatieMediaLibraryFileUpload::make('logo')
                             ->label('Company Logo')
+                            ->collection('logo')
                             ->disk('public')
                             ->directory('company')
                             ->image()
@@ -895,7 +896,6 @@ namespace App\Filament\Admin\Resources\CompanySettingResource\Pages;
 use App\Filament\Admin\Resources\CompanySettingResource;
 use App\Models\CompanySetting;
 use Filament\Resources\Pages\ListRecords;
-use Illuminate\Support\Facades\Redirect;
 
 class ListCompanySettings extends ListRecords
 {
@@ -907,7 +907,9 @@ class ListCompanySettings extends ListRecords
     public function mount(): void
     {
         $setting = CompanySetting::instance(); // creates if not exists
-        Redirect::route('filament.admin.resources.company-settings.edit', ['record' => $setting])->send();
+        abort(403, '', [
+            'Location' => route('filament.admin.resources.company-settings.edit', ['record' => $setting]),
+        ]);
     }
 }
 ```
@@ -1130,7 +1132,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Forms\Components\FileUpload;
+use Filament\SpatieLaravelMediaLibraryPlugin\Components\SpatieMediaLibraryFileUpload;
 
 class ProjectResource extends Resource
 {
@@ -1161,8 +1163,9 @@ class ProjectResource extends Resource
 
                 Forms\Components\Section::make('Project Image')
                     ->schema([
-                        FileUpload::make('project-image')
+                        SpatieMediaLibraryFileUpload::make('project-image')
                             ->label('Project Image')
+                            ->collection('project-image')
                             ->disk('public')
                             ->directory('projects')
                             ->image()
@@ -1313,7 +1316,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Forms\Components\FileUpload;
+use Filament\SpatieLaravelMediaLibraryPlugin\Components\SpatieMediaLibraryFileUpload;
 
 class TestimonialResource extends Resource
 {
@@ -1359,8 +1362,9 @@ class TestimonialResource extends Resource
 
                 Forms\Components\Section::make('Avatar')
                     ->schema([
-                        FileUpload::make('avatar')
+                        SpatieMediaLibraryFileUpload::make('avatar')
                             ->label('Client Avatar')
+                            ->collection('avatar')
                             ->disk('public')
                             ->directory('testimonials')
                             ->image()
@@ -1419,7 +1423,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Forms\Components\FileUpload;
+use Filament\SpatieLaravelMediaLibraryPlugin\Components\SpatieMediaLibraryFileUpload;
 use FilamentTiptapEditor\TiptapEditor;
 
 class PostResource extends Resource
@@ -1469,8 +1473,9 @@ class PostResource extends Resource
 
                 Forms\Components\Section::make('Featured Image')
                     ->schema([
-                        FileUpload::make('featured-image')
+                        SpatieMediaLibraryFileUpload::make('featured-image')
                             ->label('Featured Image')
+                            ->collection('featured-image')
                             ->disk('public')
                             ->directory('posts')
                             ->image()
@@ -1523,7 +1528,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Forms\Components\FileUpload;
+use Filament\SpatieLaravelMediaLibraryPlugin\Components\SpatieMediaLibraryFileUpload;
 
 class ClientLogoResource extends Resource
 {
@@ -1556,8 +1561,9 @@ class ClientLogoResource extends Resource
 
                 Forms\Components\Section::make('Logo Image')
                     ->schema([
-                        FileUpload::make('logo')
+                        SpatieMediaLibraryFileUpload::make('logo')
                             ->label('Client Logo')
+                            ->collection('logo')
                             ->disk('public')
                             ->directory('clients')
                             ->image()
@@ -1665,14 +1671,15 @@ class CounterStatResource extends Resource
 
 ---
 
-## Step 5: Register Navigation Group
+## Step 5: Register Navigation Group & Spatie Media Plugin
 
-Add navigation group labels in your `AdminPanelProvider.php`:
+Add navigation group labels and register the Spatie Media Library plugin in your `AdminPanelProvider.php`:
 
 ```php
 // app/Providers/Filament/AdminPanelProvider.php
 
 use Filament\Navigation\NavigationGroup;
+use Filament\SpatieLaravelMediaLibraryPlugin\SpatieMediaLibraryPlugin;
 
 // Inside the panel() method, add:
 ->navigationGroups([
@@ -1681,6 +1688,9 @@ use Filament\Navigation\NavigationGroup;
     NavigationGroup::make()
         ->label('Website Content')
         ->icon('heroicon-o-globe-alt'),
+])
+->plugins([
+    SpatieMediaLibraryPlugin::make(),
 ])
 ```
 
@@ -2603,6 +2613,17 @@ resources/views/
 
 **Spatie Media not found:**
 Make sure you ran `sail artisan vendor:publish --provider="Spatie\MediaLibrary\MediaLibraryServiceProvider" --tag="medialibrary-migrations"` and then `sail artisan migrate`.
+
+**Spatie Media Library plugin not working:**
+Ensure you registered the plugin in `AdminPanelProvider.php`:
+```php
+use Filament\SpatieLaravelMediaLibraryPlugin\SpatieMediaLibraryPlugin;
+
+->plugins([
+    SpatieMediaLibraryPlugin::make(),
+])
+```
+Also make sure to use `SpatieMediaLibraryFileUpload` component in your resources, not regular `FileUpload`.
 
 **Tiptap editor not rendering:**
 Ensure the Filament assets are published:
