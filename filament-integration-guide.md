@@ -2,7 +2,7 @@
 
 Step-by-step guide to replace all hardcoded data in `welcome.blade.php` with dynamic data managed through Filament admin panel.
 
-Uses **Spatie Media Library** for centralized image/media management and **Tiptap Editor** for rich text content editing.
+Uses **Spatie Media Library** for centralized image/media management and Filament's native **RichEditor** for rich text content editing.
 
 ---
 
@@ -48,13 +48,9 @@ sail artisan vendor:publish --provider="Spatie\MediaLibrary\MediaLibraryServiceP
 sail artisan migrate
 ```
 
-### 1b. Tiptap Editor for Filament
+### 1b. Rich Text Editor (Built-in)
 
-```bash
-sail composer require awcodes/filament-tiptap-editor
-```
-
-> **Note:** Verify package compatibility with your Filament version. Check the package's README for supported Filament versions. For Filament v4, check if there's a v4-compatible branch or fork.
+No extra package needed. Filament includes a native `RichEditor` form component that provides rich text editing out of the box.
 
 ### 1c. Regenerate autoload & publish assets
 
@@ -108,7 +104,7 @@ return new class extends Migration
 
 ### 2b. Page Sections (singleton-like, keyed by slug)
 
-Each row represents one content section on the welcome page. The `slug` column uniquely identifies which section the row belongs to (hero, about, benefits, etc.). The `content` column stores rich text (HTML from Tiptap). The `extra` JSON column holds section-specific structured data.
+Each row represents one content section on the welcome page. The `slug` column uniquely identifies which section the row belongs to (hero, about, benefits, etc.). The `content` column stores rich text (HTML). The `extra` JSON column holds section-specific structured data.
 
 ```bash
 sail artisan make:migration create_page_sections_table
@@ -130,7 +126,7 @@ return new class extends Migration
             $table->string('slug')->unique();       // e.g. 'hero', 'about', 'benefits'
             $table->string('title')->nullable();
             $table->string('subtitle')->nullable();  // e.g. "ABOUT US", "KEY BENEFITS"
-            $table->longText('content')->nullable(); // Rich text from Tiptap (HTML)
+            $table->longText('content')->nullable(); // Rich text (HTML)
             $table->json('extra')->nullable();       // Section-specific data
             $table->boolean('is_active')->default(true);
             $table->timestamps();
@@ -312,7 +308,7 @@ return new class extends Migration
             $table->string('title');
             $table->string('slug')->unique();
             $table->text('excerpt')->nullable();
-            $table->longText('content')->nullable(); // Rich text from Tiptap (HTML)
+            $table->longText('content')->nullable(); // Rich text (HTML)
             $table->date('published_at')->nullable();
             $table->boolean('is_published')->default(false);
             $table->timestamps();
@@ -798,7 +794,6 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use FilamentTiptapEditor\TiptapEditor;
 
 class CompanySettingResource extends Resource
 {
@@ -948,7 +943,6 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use FilamentTiptapEditor\TiptapEditor;
 
 class PageSectionResource extends Resource
 {
@@ -982,9 +976,8 @@ class PageSectionResource extends Resource
 
                 Forms\Components\Section::make('Content')
                     ->schema([
-                        TiptapEditor::make('content')
+                        Forms\Components\RichEditor::make('content')
                             ->label('Section Content')
-                            ->profile('default')  // or 'minimal', 'full'
                             ->columnSpanFull()
                             ->helperText('Rich text content for this section. Use for about paragraphs, benefit descriptions, etc.'),
                     ]),
@@ -1405,7 +1398,7 @@ class TestimonialResource extends Resource
 }
 ```
 
-### 4g. Post Resource (with Spatie Media + Tiptap)
+### 4g. Post Resource (with Spatie Media + RichEditor)
 
 ```bash
 sail artisan make:filament-resource Post --generate
@@ -1424,7 +1417,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\SpatieLaravelMediaLibraryPlugin\Components\SpatieMediaLibraryFileUpload;
-use FilamentTiptapEditor\TiptapEditor;
 
 class PostResource extends Resource
 {
@@ -1464,9 +1456,8 @@ class PostResource extends Resource
                             ->rows(2)
                             ->helperText('Short summary shown on blog listing')
                             ->columnSpanFull(),
-                        TiptapEditor::make('content')
+                        Forms\Components\RichEditor::make('content')
                             ->label('Full Content')
-                            ->profile('default')
                             ->columnSpanFull()
                             ->helperText('Full article content with rich text formatting'),
                     ]),
@@ -2520,19 +2511,18 @@ For this project, the defaults work fine. No changes needed unless you want auto
 
 ---
 
-## Step 10: Tiptap Editor Configuration
+## Step 10: Rich Editor Configuration (Optional)
 
-The `awcodes/filament-tiptap-editor` comes with default profiles. You can customize available tools:
+Filament's native `RichEditor` works out of the box with no configuration. If you want to customize the toolbar buttons globally, you can extend it in a service provider:
 
 ```php
 // In a service provider or panel provider:
 
-use FilamentTiptapEditor\TiptapEditor;
-use FilamentTiptapEditor\Enums\TiptapTool;
+use Filament\Forms\Components\RichEditor;
 
-TiptapEditor::configureUsing(function (TiptapEditor $editor) {
+RichEditor::configureUsing(function (RichEditor $editor) {
     $editor
-        ->tools([
+        ->toolbarButtons([
             'bold',
             'italic',
             'underline',
@@ -2544,16 +2534,15 @@ TiptapEditor::configureUsing(function (TiptapEditor $editor) {
             'link',
             'blockquote',
             'codeBlock',
-        ])
-        ->profile('default');
+        ]);
 });
 ```
 
 Or configure per-field in the resource:
 
 ```php
-TiptapEditor::make('content')
-    ->tools([
+Forms\Components\RichEditor::make('content')
+    ->toolbarButtons([
         'bold', 'italic', 'h2', 'h3',
         'bulletList', 'orderedList',
         'link', 'blockquote',
@@ -2625,7 +2614,7 @@ use Filament\SpatieLaravelMediaLibraryPlugin\SpatieMediaLibraryPlugin;
 ```
 Also make sure to use `SpatieMediaLibraryFileUpload` component in your resources, not regular `FileUpload`.
 
-**Tiptap editor not rendering:**
+**RichEditor not rendering:**
 Ensure the Filament assets are published:
 ```bash
 sail artisan filament:upgrade
